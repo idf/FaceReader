@@ -11,6 +11,7 @@ from LBP import *
 import cv2
 import pickle
 from util.commons_util.logger_utils.Timer import Timer
+from multiprocessing import Pool
 
 # the radius in LBP
 radius = 1
@@ -32,25 +33,33 @@ dir_path = 'E:\\GPforFR\\data\\lfw_p'
 # dst_path: the path of the file saving the feature
 dst_path = 'E:\\GPforFR\\data\\lfw_feature'
 
-timer = Timer()
-# Traversing files
-for root, dirs, files in os.walk(dir_path):
-    if files:
-        # get the image name
-        img_name = root.split('\\')[-1]
 
-        for f in files:
-            timer.start()
-            image = cv2.imread(root + '\\' + f)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def extract_feature(args):
+    image, ftr_name = args
+    timer = Timer()
+    out_file = open(ftr_name, 'w')
+    timer.start()
+    feature = Mulscl_lbp_feature(image, radius, nei, scale, scale_step, winsize, stride)
+    pickle.dump(feature, out_file)
+    out_file.close()
+    print timer.end()
 
-            ftr_name = os.path.join(dst_path, f.split('.')[0] + '.txt')
-            # if not os.path.exists(ftr_name):
+if __name__=="__main__":
+    # Traversing files
+    p = Pool(5)
+    for root, dirs, files in os.walk(dir_path):
+        if files:
+            # get the image name
+            img_name = root.split('\\')[-1]
 
-            feature = Mulscl_lbp_feature(image, radius, nei, scale, scale_step, winsize, stride)
+            load = []
+            for f in files:
+                image = cv2.imread(root + '\\' + f)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            output = open(ftr_name, 'w')
-            pickle.dump(feature, output)
-            print timer.end()
-            output.close()
-    print root
+                ftr_name = os.path.join(dst_path, f.split('.')[0] + '.txt')
+                # if not os.path.exists(ftr_name):
+                load.append((image, ftr_name))
+
+            p.map(extract_feature, load)
+        print root

@@ -10,6 +10,7 @@ import os
 from LBP import *
 import cv2
 import pickle
+from util.commons_util.logger_utils.Timer import Timer
 
 # the radius in LBP
 radius = 1
@@ -29,8 +30,9 @@ stride = 2
 dir_path = 'E:\\GPforFR\\data\\lfw_p'
 
 # dst_path: the path of the file saving the feature
-dst_path = 'E:\\GPforFR\\data\\lfw_feature1'
+dst_path = 'E:\\GPforFR\\data\\lfw_feature'
 
+timer = Timer()
 # Traversing files
 for root, dirs, files in os.walk(dir_path):
     if files:
@@ -38,6 +40,7 @@ for root, dirs, files in os.walk(dir_path):
         img_name = root.split('\\')[-1]
 
         for f in files:
+            timer.start()
             image = cv2.imread(root + '\\' + f)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -48,5 +51,6 @@ for root, dirs, files in os.walk(dir_path):
 
             output = open(ftr_name, 'w')
             pickle.dump(feature, output)
+            print timer.end()
             output.close()
     print root

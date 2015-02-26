@@ -12,7 +12,7 @@ from Read_file import read_file
 # import numpy.linalg as LA
 
 # the path of the file which saves the Multi-LBP feature
-feature_pth = 'E:\\GPforFR\\data\\lfw_feature1'
+feature_pth = 'E:\\GPforFR\\data\\lfw_feature5'
 
 # the path of the file which saves the txt describing the Target and source domain set
 instruc_pth_t = 'E:\\GPforFR\\data\\lfw_view1\\pairsDevTrain.txt'  # http://vis-www.cs.umass.edu/lfw/pairsDevTest.txt

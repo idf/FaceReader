@@ -1,2 +1,5 @@
 # FaceReader
-觀相 Face Recognition 
+Face Recognition  
+
+## Modules
+* https://github.com/bytefish/facerec

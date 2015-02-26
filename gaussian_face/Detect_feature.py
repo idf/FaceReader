@@ -35,31 +35,30 @@ dst_path = 'E:\\GPforFR\\data\\lfw_feature'
 
 
 def extract_feature(args):
-    image, ftr_name = args
     timer = Timer()
-    out_file = open(ftr_name, 'w')
     timer.start()
+
+    img_path, ftr_name = args
+    image = cv2.imread(img_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    out_file = open(ftr_name, 'w')
     feature = Mulscl_lbp_feature(image, radius, nei, scale, scale_step, winsize, stride)
     pickle.dump(feature, out_file)
     out_file.close()
+
     print timer.end()
 
 if __name__=="__main__":
     # Traversing files
-    p = Pool(5)
+    p = Pool(4)
     for root, dirs, files in os.walk(dir_path):
         if files:
-            # get the image name
-            img_name = root.split('\\')[-1]
-
             load = []
             for f in files:
-                image = cv2.imread(root + '\\' + f)
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
+                img_path = root + '\\' + f
                 ftr_name = os.path.join(dst_path, f.split('.')[0] + '.txt')
-                # if not os.path.exists(ftr_name):
-                load.append((image, ftr_name))
+                load.append((img_path, ftr_name))
 
             p.map(extract_feature, load)
         print root
+    p.close()

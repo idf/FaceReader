@@ -21,15 +21,15 @@ scale = 4
 scale_step = 1.25
 # the patch size for getting hist
 winsize = int((25 - 1) / 2)
-# the stride bettween the patch in getting hist
+# the stride between the patch in getting hist
 stride = 2
-# under this condtion, the feature dimension is 816*236
+# under this condition, the feature dimension is 816*236
 
 # dir_path: the path of the folder containing the image
 dir_path = 'E:\\GPforFR\\data\\lfw_p'
 
 # dst_path: the path of the file saving the feature
-dst_path = 'E:\\GPforFR\\data\\now'
+dst_path = 'E:\\GPforFR\\data\\lfw_feature1'
 
 # Traversing files
 for root, dirs, files in os.walk(dir_path):
@@ -50,6 +50,3 @@ for root, dirs, files in os.walk(dir_path):
             pickle.dump(feature, output)
             output.close()
     print root
-    
-
-    

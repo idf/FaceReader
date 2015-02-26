@@ -106,7 +106,7 @@ class Join_Ftr(object):
         :param Y:
         :return: the needed input X_in,Y_in of the GS_FACE model
         """
-        assert len(X) == len(Y), "the number of the image pair and their correspoing y is not equal"
+        assert len(X) == len(Y), "the number of the image pair and their corresponding y is not equal"
         num_of_pair = len(X)
         num_of_patch = X[0].shape[0]
         n_ftr = X[0].shape[1]

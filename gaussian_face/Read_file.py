@@ -26,14 +26,18 @@ class read_file(object):
         # process part of
         if self.num != self.total:
             # line_label: save the labels of the line to be processed
-            line_label = random.sample(tmp, self.num)
+            rand = False
+            if rand:
+                line_label = random.sample(tmp, self.num)
+            else:
+                line_label = tmp[:self.num]
 
-            for i in range(len(line_label)):
-                person.append(self.__Extrct_flnm(line_label[i]))
+            for i in line_label:
+                person.append(self.__extract_flnm(i))
         # process all
         else:
             for i in tmp:
-                person.append(self.__Extrct_flnm(i))
+                person.append(self.__extract_flnm(i))
 
         return person
 
@@ -46,32 +50,27 @@ class read_file(object):
             line_label = random.sample(tmp, self.num)
 
             for i in range(len(line_label)):
-                person.append(self.__Extrct_flnm(line_label[i]))
+                person.append(self.__extract_flnm(line_label[i]))
         else:
             for i in tmp:
-                person.append(self.__Extrct_flnm(i))
+                person.append(self.__extract_flnm(i))
 
         return person
 
-    def __Extrct_flnm(self, line_label):
+    def __extract_flnm(self, line_label):
         tmp = linecache.getline(self.pth1, line_label)
         tmp = tmp.split()
+        suffix = '.txt'  # reading feature rather than image
 
         if len(tmp) == 3:
             flag = 1
-            fl_nm1 = tmp[0] + '_' + '0' * (4 - len(tmp[1])) + tmp[1] + '.txt'
-            fl_nm2 = tmp[0] + '_' + '0' * (4 - len(tmp[2])) + tmp[2] + '.txt'
+            fl_nm1 = tmp[0] + '_' + '0'*(4 - len(tmp[1])) + tmp[1] + suffix
+            fl_nm2 = tmp[0] + '_' + '0'*(4 - len(tmp[2])) + tmp[2] + suffix
         else:
             flag = -1
-            fl_nm1 = tmp[0] + '_' + '0' * (4 - len(tmp[1])) + tmp[1] + '.txt'
-            fl_nm2 = tmp[2] + '_' + '0' * (4 - len(tmp[3])) + tmp[3] + '.txt'
+            fl_nm1 = tmp[0] + '_' + '0'*(4 - len(tmp[1])) + tmp[1] + suffix
+            fl_nm2 = tmp[2] + '_' + '0'*(4 - len(tmp[3])) + tmp[3] + suffix
 
         pair_info = [fl_nm1, fl_nm2, flag]
 
         return pair_info
-        
-        
-    
-
-    
-    

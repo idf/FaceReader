@@ -10,7 +10,7 @@ kernels:
 import numpy as np
 
 
-class Kernels:
+class Kernel:
     def __init__(self, alpha, gammas):
         self.alpha = np.exp(alpha)
         self.gammas = np.exp(gammas)

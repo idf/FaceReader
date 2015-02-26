@@ -5,7 +5,7 @@ Created on Thu Jun 12 10:03:18 2014
 @author: mountain
 """
 import numpy as np
-from kernels import *
+from Kernel import Kernel
 import numpy.matlib as Nmat
 import numpy.linalg as LA
 
@@ -104,17 +104,17 @@ class GsFace(object):
 
         X_ts = np.append(self.X_tar, self.X_src)
 
-        K_t = Kernels(self.X_tar, self.theta)
+        K_t = Kernel(self.X_tar, self.theta)
         J_t = self.KFDA_J(K_t, N_pt, N_nt, q)
         log_pt = np.log(self.P_poster(self.X_tar, K_t, J_t, delta))
         pt = self.P_poster(self.X_tar, K_t, J_t, N_pt, N_nt, q)  # N_qt -> N_nt
 
-        K_ts = Kernels(X_ts, self.theta)
+        K_ts = Kernel(X_ts, self.theta)
         J_ts = self.KFDA_J(K_ts, N_ps + +N_pt, N_ns + N_nt, q)
         log_pts = np.log(self.P_poster(X_ts, K_ts, J_ts, delta))
         pts = self.P_poster(X_ts, K_ts, J_ts, N_ps, N_ns, q)  # N_qs -> N_ns
 
-        K_s = Kernels(self.X_src, self.theta)
+        K_s = Kernel(self.X_src, self.theta)
         J_s = self.KFDA_J(K_s, N_ps, N_ns, q)
         log_ps = np.log(self.P_poster(self.X_src, K_s, J_s, delta))
         # psrc=P_poster(self.X_src,K_s,J_s,N_ps+N_pt,N_ns+N_nt,q)

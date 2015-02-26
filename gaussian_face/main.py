@@ -6,10 +6,9 @@ the main function for Face Recognition
 """
 
 from Join_Ftr import *
-from Read_file import read_file
-# from GS_Face import GS_Face
-# import numpy.matlib as Nmat
-# import numpy.linalg as LA
+from ReadFile import ReadFile
+from GS_Face import GsFace
+
 
 # the path of the file which saves the Multi-LBP feature
 feature_pth = 'E:\\GPforFR\\data\\lfw_feature5'
@@ -22,26 +21,25 @@ instruc_pth_s = 'E:\\GPforFR\\data\\lfw_view1\\pairsDevTest.txt'  # http://vis-w
 num = 5
 
 # obtain the pair information
-rd_fl = read_file(instruc_pth_t, num)
-X1 = rd_fl.person_pair() + rd_fl.person_mispair()
+read_file = ReadFile(instruc_pth_t, num)
+X1 = read_file.person_pair() + read_file.person_mispair()
 
-rd_fl = read_file(instruc_pth_s, num)
-X2 = rd_fl.person_pair() + rd_fl.person_mispair()
+read_file = ReadFile(instruc_pth_s, num)
+X2 = read_file.person_pair() + read_file.person_mispair()
 
 # Construct a Gaussian Face feature class
-tGsFtr = Join_Ftr()
+gs_feature = Join_Ftr()
 
 # obtain the target-domain joint feature Xtar, and Ytar
-Xtar, Ytar = tGsFtr.Constrct_XY(feature_pth, X1)
-# Xsrc,Ysrc=tGsFtr.Constrct_XY(feature_pth,X2)
+Xtar, Ytar = gs_feature.Constrct_XY(feature_pth, X1)
+Xsrc, Ysrc = gs_feature.Constrct_XY(feature_pth, X2)
 
-Xt_in, Yt_in = tGsFtr.XY_in(Xtar, Ytar)
-# Xs_in,Ys_in=tGsFtr.XY_in(Xsrc,Ysrc)
+Xt_in, Yt_in = gs_feature.XY_in(Xtar, Ytar)
+Xs_in, Ys_in = gs_feature.XY_in(Xsrc, Ysrc)
 
 
-
-# gsface=GS_Face(Xt_in,Xs_in)
-# delta=
-# beta=
-# lmodel=gsface.Gs_model(delta,beta,N_ps,N_ns,N_pt,N_nt,q=0)
-
+gsface = GsFace(Xt_in, Xs_in)
+# delta =
+# beta =
+# How to obtain N_ps, N_ns, N_pt, N_nt
+# lmodel = gsface.Gs_model(delta, beta, N_ps, N_ns, N_pt, N_nt, q=0)

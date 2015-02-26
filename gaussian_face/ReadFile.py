@@ -10,7 +10,7 @@ import linecache
 import random
 
 
-class read_file(object):
+class ReadFile(object):
     def __init__(self, pth1, num=None):
         self.pth1 = pth1
         self.num = num

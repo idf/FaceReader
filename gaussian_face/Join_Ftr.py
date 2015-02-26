@@ -114,13 +114,13 @@ class Join_Ftr(object):
         Y_in = mat.zeros([num_of_pair * num_of_patch * 2, 1])
         num = 0
         for i in range(num_of_pair):
-            Img_pair = X[i]
+            img_pair = X[i]
             for j in range(num_of_patch):
-                X_in[num] = Img_pair[j]
+                X_in[num] = img_pair[j]
                 Y_in[num] = Y[i]
                 num = num + 1
-                X_in[num, 0:n_ftr / 2] = Img_pair[j][n_ftr / 2:]
-                X_in[num, n_ftr / 2:] = Img_pair[j][0:n_ftr / 2]
+                X_in[num, 0:n_ftr / 2] = img_pair[j][n_ftr / 2:]
+                X_in[num, n_ftr / 2:] = img_pair[j][0:n_ftr / 2]
                 Y_in[num] = Y[i]
                 num = num + 1
 

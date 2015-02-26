@@ -13,12 +13,12 @@ import numpy.linalg as LA
 class GsFace(object):
     def __init__(self, X_tar, X_src):
         """
-            X_src: matrix, the feature of the source domain data
-            X_tar: matrix, the feature of the target domain data
+        :param X_src: matrix, the feature of the source domain data
+        :param X_tar: matrix, the feature of the target domain data
         """
         n_src, n_ftr1 = X_src.shape
         n_tar, n_ftr2 = X_tar.shape
-        assert n_ftr1 == n_ftr2, 'the deminsion of the X_src and the X_tar is not equal'
+        assert n_ftr1 == n_ftr2, 'the dimension of the X_src and the X_tar is not equal'
         n_ftr = n_ftr1
         self.theta = np.zeros([n_ftr + 2, 1])
         self.X_tar = X_tar
@@ -31,11 +31,18 @@ class GsFace(object):
             -0.5 * (np.trace(K * X * X.T)))
 
     def KFDA_J(self, K, N_p, N_n, q=0):
-        # calculate the kfda J
-        # N_p:the number of the positive feature
-        # N_n:the number of the negtive feature
-        if q == 0:
-            q = N_p + N_q
+        """
+        calculate the KFDA J (eq. 9)
+
+        speed up version
+        :param K:
+        :param N_p: the number of the positive feature
+        :param N_n: the number of the negative feature
+        :param q:
+        :return:
+        """
+        if q==0:
+            q = N_p + N_n  # + N_q
         a = Nmat.ones([N_p + N_n, 1])
         a[0:N_p] = 1 / N_p
         a[N_p:] = -1 / N_n
@@ -43,12 +50,13 @@ class GsFace(object):
                          np.diag(1 / np.sqrt(N_n) * (Nmat.identity(N_n) - 1 / N_n * Nmat.ones([N_n, N_n])))])
 
         #
-        Q = Clustr_kmeans(K, q)
+        # Q = Clustr_kmeans(K, q)  # speed up, q<<n
+        Q = K
         #
 
-        tmp = np.linaly.inv(1e-8 * Nmat.identity(N_p + N_n) + A * K * A)
+        # tmp = np.linaly.inv(1e-8 * Nmat.identity(N_p + N_n) + A * K * A)
         tmp = 1e8 * Nmat.identity(N_p + N_n) - 1e8 * A * Q * LA.inv(1e8 * Nmat.identity(q) + Q.T * A * A(Q)) * Q.T * A
-        J = 1 / (1e-8) * (a.T * K * a - a.T * K * A * tmp * A * K * a)
+        J = 1/1e-8 * (a.T * K * a - a.T * K * A * tmp * A * K * a)
         return J
 
     def P_latent(self, J, delta):
@@ -65,9 +73,9 @@ class GsFace(object):
             p = p * self.theta[i]
         return p
 
-    def P_poster(self, X, K, J, N_p, N_q, q=0):
-        # return p(z\x)
-        return self.P_theta(self.theta) * self.P_latent(J, delta) * self.P_prior(X, K)
+    # def P_poster(self, X, K, J, N_p, N_q, q=0):
+    #     # return p(z\x)
+    #     return self.P_theta(self.theta) * self.P_latent(J, delta) * self.P_prior(X, K)
 
     def P_poster(self, X, K, J, delta):
         n_data, n_ftr = X.shape
@@ -82,23 +90,29 @@ class GsFace(object):
         return log_prior + log_theta + log_latent
 
     def Gs_model(self, delta, beta, N_ps, N_ns, N_pt, N_nt, q=0):
-        # construct the gs model
-        # delta : in eq.13 when calculate p_latent
-        # beta: in eq.19
-        # N_p:the number of the positive feature
-        # N_n:the number of the negtive feature
+        """
+        construct the gs model (eq. 17)
+        :param delta: in eq.13 when calculate p_latent
+        :param beta: balances the relative importance
+        :param N_ps: the number of the positive feature
+        :param N_ns: the number of the negative feature
+        :param N_pt:
+        :param N_nt:
+        :param q:
+        :return:
+        """
 
         X_ts = np.append(self.X_tar, self.X_src)
 
-        K_t = Kernels(self.X_tar, self.theta)  # ? Kernels
+        K_t = Kernels(self.X_tar, self.theta)
         J_t = self.KFDA_J(K_t, N_pt, N_nt, q)
         log_pt = np.log(self.P_poster(self.X_tar, K_t, J_t, delta))
-        pt = self.P_poster(self.X_tar, K_t, J_t, N_pt, N_qt, q)
+        pt = self.P_poster(self.X_tar, K_t, J_t, N_pt, N_nt, q)  # N_qt -> N_nt
 
         K_ts = Kernels(X_ts, self.theta)
         J_ts = self.KFDA_J(K_ts, N_ps + +N_pt, N_ns + N_nt, q)
         log_pts = np.log(self.P_poster(X_ts, K_ts, J_ts, delta))
-        pts = self.P_poster(X_ts, K_ts, J_ts, N_ps, N_qs, q)
+        pts = self.P_poster(X_ts, K_ts, J_ts, N_ps, N_ns, q)  # N_qs -> N_ns
 
         K_s = Kernels(self.X_src, self.theta)
         J_s = self.KFDA_J(K_s, N_ps, N_ns, q)

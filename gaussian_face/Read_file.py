@@ -20,7 +20,6 @@ class read_file(object):
             self.num = self.total
 
     def person_pair(self):
-
         person = []
         tmp = range(2, self.total + 2)
 
@@ -39,7 +38,6 @@ class read_file(object):
         return person
 
     def person_mispair(self):
-
         person = []
         tmp = range(self.total + 2, self.total * 2 + 2)
 
@@ -56,7 +54,6 @@ class read_file(object):
         return person
 
     def __Extrct_flnm(self, line_label):
-
         tmp = linecache.getline(self.pth1, line_label)
         tmp = tmp.split()
 

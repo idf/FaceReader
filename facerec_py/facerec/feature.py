@@ -60,7 +60,7 @@ class PCA(AbstractFeature):
         y = np.asarray(y)
         # set a valid number of components
         if self._num_components <= 0 or (self._num_components > XC.shape[1]-1):
-            self._num_components = XC.shape[1]-1
+            self._num_components = XC.shape[1]-1  # one less dimension
         # center dataset
         self._mean = XC.mean(axis=1).reshape(-1,1)
         XC = XC - self._mean

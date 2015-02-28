@@ -2,24 +2,26 @@
 import numpy as np
 from scipy.signal import convolve2d
 
+
 class LocalDescriptor(object):
     def __init__(self, neighbors):
         self._neighbors = neighbors
 
     def __call__(self,X):
         raise NotImplementedError("Every LBPOperator must implement the __call__ method.")
-        
+
     @property
     def neighbors(self):
         return self._neighbors
-        
+
     def __repr__(self):
         return "LBPOperator (neighbors=%s)" % (self._neighbors)
+
 
 class OriginalLBP(LocalDescriptor):
     def __init__(self):
         LocalDescriptor.__init__(self, neighbors=8)
-    
+
     def __call__(self,X):
         X = np.asarray(X)
         X = (1<<7) * (X[0:-2,0:-2] >= X[1:-1,1:-1]) \
@@ -31,15 +33,16 @@ class OriginalLBP(LocalDescriptor):
             + (1<<1) * (X[2:,:-2] >= X[1:-1,1:-1]) \
             + (1<<0) * (X[1:-1,:-2] >= X[1:-1,1:-1])
         return X
-        
+
     def __repr__(self):
         return "OriginalLBP (neighbors=%s)" % (self._neighbors)
+
 
 class ExtendedLBP(LocalDescriptor):
     def __init__(self, radius=1, neighbors=8):
         LocalDescriptor.__init__(self, neighbors=neighbors)
         self._radius = radius
-        
+
     def __call__(self,X):
         X = np.asanyarray(X)
         ysize, xsize = X.shape
@@ -95,15 +98,16 @@ class ExtendedLBP(LocalDescriptor):
     @property
     def radius(self):
         return self._radius
-    
+
     def __repr__(self):
         return "ExtendedLBP (neighbors=%s, radius=%s)" % (self._neighbors, self._radius)
-        
+
+
 class VarLBP(LocalDescriptor):
     def __init__(self, radius=1, neighbors=8):
         LocalDescriptor.__init__(self, neighbors=neighbors)
         self._radius = radius
-        
+
     def __call__(self,X):
         X = np.asanyarray(X)
         ysize, xsize = X.shape
@@ -165,9 +169,10 @@ class VarLBP(LocalDescriptor):
     @property
     def radius(self):
         return self._radius
-    
+
     def __repr__(self):
         return "VarLBP (neighbors=%s, radius=%s)" % (self._neighbors, self._radius)
+
 
 class LPQ(LocalDescriptor):
     """ This implementation of Local Phase Quantization (LPQ) is a 1:1 adaption of the 
@@ -184,11 +189,11 @@ class LPQ(LocalDescriptor):
 
         Copyright 2008 by Heikkilä & Ojansivu
     """
-    
+
     def __init__(self, radius=3):
         LocalDescriptor.__init__(self, neighbors=8)
         self._radius = radius
-    
+
     def euc_dist(self, X):
         Y = X = X.astype(np.float)
         XX = np.sum(X * X, axis=1)[:, np.newaxis]
@@ -200,7 +205,7 @@ class LPQ(LocalDescriptor):
         np.maximum(distances, 0, distances)
         distances.flat[::distances.shape[0] + 1] = 0.0
         return np.sqrt(distances)
-        
+
     def __call__(self,X):
         f = 1.0
         x = np.arange(-self._radius,self._radius+1)
@@ -210,11 +215,11 @@ class LPQ(LocalDescriptor):
         pp = np.concatenate((xp,yp)).reshape(2,-1)
         dd = self.euc_dist(pp.T) # squareform(pdist(...)) would do the job, too...
         C = np.power(rho,dd)
-        
+
         w0 = (x*0.0+1.0)
         w1 = np.exp(-2*np.pi*1j*x*f/n)
         w2 = np.conj(w1)
-        
+
         q1 = w0.reshape(-1,1)*w1
         q2 = w1.reshape(-1,1)*w0
         q3 = w1.reshape(-1,1)*w1
@@ -228,9 +233,9 @@ class LPQ(LocalDescriptor):
         u6 = np.imag(q3)
         u7 = np.real(q4)
         u8 = np.imag(q4)
-        
+
         M = np.matrix([u1.flatten(1), u2.flatten(1), u3.flatten(1), u4.flatten(1), u5.flatten(1), u6.flatten(1), u7.flatten(1), u8.flatten(1)])
-        
+
         D = np.dot(np.dot(M,C), M.T)
         U,S,V = np.linalg.svd(D)
 
@@ -241,26 +246,26 @@ class LPQ(LocalDescriptor):
 
         Fa = np.real(Qa)
         Ga = np.imag(Qa)
-        Fb = np.real(Qb) 
+        Fb = np.real(Qb)
         Gb = np.imag(Qb)
-        Fc = np.real(Qc) 
+        Fc = np.real(Qc)
         Gc = np.imag(Qc)
-        Fd = np.real(Qd) 
+        Fd = np.real(Qd)
         Gd = np.imag(Qd)
-        
+
         F = np.array([Fa.flatten(1), Ga.flatten(1), Fb.flatten(1), Gb.flatten(1), Fc.flatten(1), Gc.flatten(1), Fd.flatten(1), Gd.flatten(1)])
         G = np.dot(V.T, F)
-        
+
         t = 0
 
         # Calculate the LPQ Patterns:
         B = (G[0,:]>=t)*1 + (G[1,:]>=t)*2 + (G[2,:]>=t)*4 + (G[3,:]>=t)*8 + (G[4,:]>=t)*16 + (G[5,:]>=t)*32 + (G[6,:]>=t)*64 + (G[7,:]>=t)*128
-        
+
         return np.reshape(B, np.shape(Fa))
-        
+
     @property
     def radius(self):
         return self._radius
-    
+
     def __repr__(self):
         return "LPQ (neighbors=%s, radius=%s)" % (self._neighbors, self._radius)

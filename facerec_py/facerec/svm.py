@@ -1,6 +1,6 @@
-from facerec.classifier import SVM
-from facerec.validation import KFoldCrossValidation
-from facerec.model import PredictableModel
+from facerec_py.facerec.classifier import SVM
+from facerec_py.facerec.validation import KFoldCrossValidation
+from facerec_py.facerec.model import PredictableModel
 from svmutil import *
 from itertools import product
 import numpy as np
@@ -17,12 +17,14 @@ def range_f(begin, end, step):
         begin = begin + step
     return seq
 
+
 def grid(grid_parameters):
     grid = []
     for parameter in grid_parameters:
         begin, end, step = parameter
         grid.append(range_f(begin, end, step))
     return product(*grid)
+
 
 def grid_search(model, X, y, C_range=(-5,  15, 2), gamma_range=(3, -15, -2), k=5, num_cores=1):
     

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def minmax(X, low, high, minX=None, maxX=None, dtype=np.float):
     X = np.asarray(X)
     if minX is None:
@@ -10,9 +11,10 @@ def minmax(X, low, high, minX=None, maxX=None, dtype=np.float):
     X = X - float(minX)
     X = X / float((maxX - minX))
     # scale to [low...high].
-    X = X * (high-low)
+    X = X * (high - low)
     X = X + low
-    return np.asarray(X,dtype=dtype)
+    return np.asarray(X, dtype=dtype)
+
 
 def zscore(X, mean=None, std=None):
     X = np.asarray(X)
@@ -20,5 +22,5 @@ def zscore(X, mean=None, std=None):
         mean = X.mean()
     if std is None:
         std = X.std()
-    X = (X-mean)/std
+    X = (X - mean) / std
     return X

@@ -1,8 +1,9 @@
-from facerec.distance import EuclideanDistance
-from facerec.util import asRowMatrix
+from facerec_py.facerec.distance import EuclideanDistance
+from facerec_py.facerec.util import asRowMatrix
 import logging
 import numpy as np
 import operator as op
+
 
 class AbstractClassifier(object):
 
@@ -14,6 +15,7 @@ class AbstractClassifier(object):
 
     def update(self,X,y):
         raise NotImplementedError("This Classifier is cannot be updated.")
+
 
 class NearestNeighbor(AbstractClassifier):
     """
@@ -107,7 +109,10 @@ except:
 
 import sys
 from StringIO import StringIO
+from svmutil import *
+
 bkp_stdout=sys.stdout
+
 
 class SVM(AbstractClassifier):
     """

@@ -1,5 +1,5 @@
-from facerec.feature import AbstractFeature
-from facerec.classifier import AbstractClassifier
+from facerec_py.facerec.feature import AbstractFeature
+from facerec_py.facerec.classifier import AbstractClassifier
 
 class PredictableModel(object):
     def __init__(self, feature, classifier):

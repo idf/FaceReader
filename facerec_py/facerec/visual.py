@@ -1,4 +1,4 @@
-from facerec.normalization import minmax
+from facerec_py.facerec.normalization import minmax
 
 import os as os
 import numpy as np
@@ -15,6 +15,7 @@ import math as math
 def create_font(fontname='Tahoma', fontsize=10):
     return { 'fontname': fontname, 'fontsize':fontsize }
 
+
 def plot_gray(X,  sz=None, filename=None):
     if not sz is None:
         X = X.reshape(sz)
@@ -25,7 +26,8 @@ def plot_gray(X,  sz=None, filename=None):
         plt.show()
     else:
         fig.savefig(filename, format="png", transparent=False)
-    
+
+
 def plot_eigenvectors(eigenvectors, num_components, sz, filename=None, start_component=0, rows = None, cols = None, title="Subplot", color=True):
         if (rows is None) or (cols is None):
             rows = cols = int(math.ceil(np.sqrt(num_components)))
@@ -49,7 +51,8 @@ def plot_eigenvectors(eigenvectors, num_components, sz, filename=None, start_com
             fig.show()
         else:
             fig.savefig(filename, format="png", transparent=False)
-            
+
+
 def subplot(title, images, rows, cols, sptitle="subplot", sptitles=[], colormap=cm.gray, ticks_visible=True, filename=None):
     fig = plt.figure()
     # main title

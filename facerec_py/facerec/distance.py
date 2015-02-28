@@ -15,7 +15,8 @@ class AbstractDistance(object):
 
     def __repr__(self):
         return self._name
-        
+
+
 class EuclideanDistance(AbstractDistance):
     def __init__(self):
         AbstractDistance.__init__(self,"EuclideanDistance")
@@ -24,6 +25,7 @@ class EuclideanDistance(AbstractDistance):
         p = np.asarray(p).flatten()
         q = np.asarray(q).flatten()
         return np.sqrt(np.sum(np.power((p-q),2)))
+
 
 class CosineDistance(AbstractDistance):
     """
@@ -39,6 +41,7 @@ class CosineDistance(AbstractDistance):
         p = np.asarray(p).flatten()
         q = np.asarray(q).flatten()
         return -np.dot(p.T,q) / (np.sqrt(np.dot(p,p.T)*np.dot(q,q.T)))
+
 
 class NormalizedCorrelation(AbstractDistance):
     """
@@ -75,6 +78,7 @@ class ChiSquareDistance(AbstractDistance):
         bin_dists = (p-q)**2 / (p+q+np.finfo('float').eps)
         return np.sum(bin_dists)
 
+
 class HistogramIntersection(AbstractDistance):
     def __init__(self):
         AbstractDistance.__init__(self,"HistogramIntersection")
@@ -83,6 +87,7 @@ class HistogramIntersection(AbstractDistance):
         p = np.asarray(p).flatten()
         q = np.asarray(q).flatten()
         return np.sum(np.minimum(p,q))
+
 
 class BinRatioDistance(AbstractDistance):
     """
@@ -101,6 +106,7 @@ class BinRatioDistance(AbstractDistance):
         b = ((p-q)**2 + 2*a*(p*q))/((p+q)**2+np.finfo('float').eps)
         return np.abs(np.sum(b))
 
+
 class L1BinRatioDistance(AbstractDistance):
     """
     Calculates the L1-Bin Ratio Dissimilarity.
@@ -117,6 +123,7 @@ class L1BinRatioDistance(AbstractDistance):
         a = np.abs(1-np.dot(p,q.T)) # NumPy needs np.dot instead of * for reducing to tensor
         b = ((p-q)**2 + 2*a*(p*q)) * abs(p-q) / ((p+q)**2+np.finfo('float').eps)
         return np.abs(np.sum(b))
+
 
 class ChiSquareBRD(AbstractDistance):
     """

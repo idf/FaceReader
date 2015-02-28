@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class AbstractFeature(object):
 
     def compute(self,X,y):
@@ -16,6 +17,7 @@ class AbstractFeature(object):
         
     def __repr__(self):
         return "AbstractFeature"
+
 
 class Identity(AbstractFeature):
     """
@@ -35,9 +37,10 @@ class Identity(AbstractFeature):
         return "Identity"
 
 
-from facerec.util import asColumnMatrix
-from facerec.operators import ChainOperator, CombineOperator
-        
+from facerec_py.facerec.util import asColumnMatrix
+from facerec_py.facerec.operators import ChainOperator, CombineOperator
+
+
 class PCA(AbstractFeature):
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
@@ -100,7 +103,8 @@ class PCA(AbstractFeature):
         
     def __repr__(self):
         return "PCA (num_components=%d)" % (self._num_components)
-        
+
+
 class LDA(AbstractFeature):
 
     def __init__(self, num_components=0):
@@ -164,7 +168,8 @@ class LDA(AbstractFeature):
     
     def __repr__(self):
         return "LDA (num_components=%d)" % (self._num_components)
-        
+
+
 class Fisherfaces(AbstractFeature):
 
     def __init__(self, num_components=0):
@@ -222,7 +227,8 @@ class Fisherfaces(AbstractFeature):
     def __repr__(self):
         return "Fisherfaces (num_components=%s)" % (self.num_components)
 
-from facerec.lbp import LocalDescriptor, ExtendedLBP
+from facerec_py.facerec.lbp import LocalDescriptor, ExtendedLBP
+
 
 class SpatialHistogram(AbstractFeature):
     def __init__(self, lbp_operator=ExtendedLBP(), sz = (8,8)):

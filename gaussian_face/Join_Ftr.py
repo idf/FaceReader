@@ -125,12 +125,4 @@ class Join_Ftr(object):
                 num = num + 1
 
         return X_in, Y_in
-
-                
-            
-    
-        
-
-
-  
     

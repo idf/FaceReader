@@ -50,7 +50,7 @@ class GsFace(object):
                          np.diag(1 / np.sqrt(N_n) * (Nmat.identity(N_n) - 1 / N_n * Nmat.ones([N_n, N_n])))])
 
         #
-        # Q = Clustr_kmeans(K, q)  # speed up, q<<n
+        # Q = Clustr_kmeans(K, q)  # speed up, q<<n  # TODO
         Q = K
         #
 
@@ -110,7 +110,7 @@ class GsFace(object):
         pt = self.P_poster(self.X_tar, K_t, J_t, N_pt, N_nt, q)  # N_qt -> N_nt
 
         K_ts = Kernel(X_ts, self.theta)
-        J_ts = self.KFDA_J(K_ts, N_ps + +N_pt, N_ns + N_nt, q)
+        J_ts = self.KFDA_J(K_ts, N_ps + N_pt, N_ns + N_nt, q)
         log_pts = np.log(self.P_poster(X_ts, K_ts, J_ts, delta))
         pts = self.P_poster(X_ts, K_ts, J_ts, N_ps, N_ns, q)  # N_qs -> N_ns
 

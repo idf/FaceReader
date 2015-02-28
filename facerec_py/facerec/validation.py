@@ -3,11 +3,11 @@ import math as math
 import random as random
 import logging
 
-from facerec.model import PredictableModel
-from facerec.classifier import AbstractClassifier
+from facerec_py.facerec.model import PredictableModel
+from facerec_py.facerec.classifier import AbstractClassifier
 
 # TODO The evaluation of a model should be completely moved to the generic ValidationStrategy. The specific Validation 
-#       implementations should only care about partition the data, which would make a lot sense. Currently it is not 
+# implementations should only care about partition the data, which would make a lot sense. Currently it is not
 #       possible to calculate the true_negatives and false_negatives with the way the predicitions are generated and 
 #       data is prepared.
 #       
@@ -17,6 +17,7 @@ from facerec.classifier import AbstractClassifier
 #     Please be careful, when referring to the Performance Metrics at the moment, only the Precision is implemented,
 #       and the rest has no use at the moment. Due to the missing refactoring discussed above.
 #
+
 
 def shuffle(X, y):
     """ Shuffles two arrays by column (len(X) == len(y))
@@ -35,8 +36,9 @@ def shuffle(X, y):
     X = [X[i] for i in idx]
     y = y[idx]
     return (X, y)
-    
-def slice_2d(X,rows,cols):
+
+
+def slice_2d(X, rows, cols):
     """
     
     Slices a 2D list to a flat array. If you know a better approach, please correct this.
@@ -56,6 +58,7 @@ def slice_2d(X,rows,cols):
     """
     return [X[i][j] for j in cols for i in rows]
 
+
 def precision(true_positives, false_positives):
     """Returns the precision, calculated as:
         
@@ -63,7 +66,8 @@ def precision(true_positives, false_positives):
         
     """
     return accuracy(true_positives, 0, false_positives, 0)
-    
+
+
 def accuracy(true_positives, true_negatives, false_positives, false_negatives, description=None):
     """Returns the accuracy, calculated as:
     
@@ -75,27 +79,33 @@ def accuracy(true_positives, true_negatives, false_positives, false_negatives, d
     false_positives = float(false_positives)
     false_negatives = float(false_negatives)
     if (true_positives + true_negatives + false_positives + false_negatives) < 1e-15:
-       return 0.0
-    return (true_positives+true_negatives)/(true_positives+false_positives+true_negatives+false_negatives)
+        return 0.0
+    return (true_positives + true_negatives) / (true_positives + false_positives + true_negatives + false_negatives)
+
 
 class ValidationResult(object):
     """Holds a validation result.
     """
+
     def __init__(self, true_positives, true_negatives, false_positives, false_negatives, description):
         self.true_positives = true_positives
         self.true_negatives = true_negatives
         self.false_positives = false_positives
         self.false_negatives = false_negatives
         self.description = description
-        
+
     def __repr__(self):
         res_precision = precision(self.true_positives, self.false_positives) * 100
-        res_accuracy = accuracy(self.true_positives, self.true_negatives, self.false_positives, self.false_negatives) * 100
-        return "ValidationResult (Description=%s, Precision=%.2f%%, Accuracy=%.2f%%)" % (self.description, res_precision, res_accuracy)
-    
+        res_accuracy = accuracy(self.true_positives, self.true_negatives, self.false_positives,
+                                self.false_negatives) * 100
+        return "ValidationResult (Description=%s, Precision=%.2f%%, Accuracy=%.2f%%)" % (
+            self.description, res_precision, res_accuracy)
+
+
 class ValidationStrategy(object):
     """ Represents a generic Validation kernel for all Validation strategies.
     """
+
     def __init__(self, model):
         """    
         Initialize validation with empty results.
@@ -104,14 +114,14 @@ class ValidationStrategy(object):
         
             model [PredictableModel] The model, which is going to be validated.
         """
-        if not isinstance(model,PredictableModel):
+        if not isinstance(model, PredictableModel):
             raise TypeError("Validation can only validate the type PredictableModel.")
         self.model = model
         self.validation_results = []
-    
+
     def add(self, validation_result):
         self.validation_results.append(validation_result)
-        
+
     def validate(self, X, y, description):
         """
         
@@ -122,8 +132,8 @@ class ValidationStrategy(object):
         
         """
         raise NotImplementedError("Every Validation module must implement the validate method!")
-        
-    
+
+
     def print_results(self):
         print self.model
         for validation_result in self.validation_results:
@@ -131,7 +141,8 @@ class ValidationStrategy(object):
 
     def __repr__(self):
         return "Validation Kernel (model=%s)" % (self.model)
-        
+
+
 class KFoldCrossValidation(ValidationStrategy):
     """ 
     
@@ -146,6 +157,7 @@ class KFoldCrossValidation(ValidationStrategy):
     
     Please note: If there are less than k observations in a class, k is set to the minimum of observations available through all classes.
     """
+
     def __init__(self, model, k=10):
         """
         Args:
@@ -163,42 +175,42 @@ class KFoldCrossValidation(ValidationStrategy):
             X [dim x num_data] input data to validate on
             y [1 x num_data] classes
         """
-        X,y = shuffle(X,y)
+        X, y = shuffle(X, y)
         c = len(np.unique(y))
         foldIndices = []
         n = np.iinfo(np.int).max
-        for i in range(0,c):
-            idx = np.where(y==i)[0]
+        for i in range(0, c):
+            idx = np.where(y == i)[0]
             n = min(n, idx.shape[0])
-            foldIndices.append(idx.tolist()); 
+            foldIndices.append(idx.tolist());
 
-        # I assume all folds to be of equal length, so the minimum
+            # I assume all folds to be of equal length, so the minimum
         # number of samples in a class is responsible for the number
         # of folds. This is probably not desired. Please adjust for
         # your use case.
         if n < self.k:
             self.k = n
 
-        foldSize = int(math.floor(n/self.k))
-        
-        true_positives, false_positives, true_negatives, false_negatives = (0,0,0,0)
-        for i in range(0,self.k):
-        
-            self.logger.info("Processing fold %d/%d." % (i+1, self.k))
-                
+        foldSize = int(math.floor(n / self.k))
+
+        true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
+        for i in range(0, self.k):
+
+            self.logger.info("Processing fold %d/%d." % (i + 1, self.k))
+
             # calculate indices
-            l = int(i*foldSize)
-            h = int((i+1)*foldSize)
-            testIdx = slice_2d(foldIndices, cols=range(l,h), rows=range(0, c))
-            trainIdx = slice_2d(foldIndices,cols=range(0,l), rows=range(0,c))
-            trainIdx.extend(slice_2d(foldIndices,cols=range(h,n),rows=range(0,c)))
-            
+            l = int(i * foldSize)
+            h = int((i + 1) * foldSize)
+            testIdx = slice_2d(foldIndices, cols=range(l, h), rows=range(0, c))
+            trainIdx = slice_2d(foldIndices, cols=range(0, l), rows=range(0, c))
+            trainIdx.extend(slice_2d(foldIndices, cols=range(h, n), rows=range(0, c)))
+
             # build training data subset
             Xtrain = [X[t] for t in trainIdx]
             ytrain = y[trainIdx]
-                        
+
             self.model.compute(Xtrain, ytrain)
-            
+
             # TODO I have to add the true_negatives and false_negatives. Models also need to support it,
             # so we should use a PredictionResult, instead of trying to do this by simply comparing
             # the predicted and actual class.
@@ -210,11 +222,12 @@ class KFoldCrossValidation(ValidationStrategy):
                     true_positives = true_positives + 1
                 else:
                     false_positives = false_positives + 1
-                    
+
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
-    
+
     def __repr__(self):
         return "k-Fold Cross Validation (model=%s, k=%s)" % (self.model, self.k)
+
 
 class LeaveOneOutCrossValidation(ValidationStrategy):
     """ Leave-One-Cross Validation (LOOCV) uses one observation for testing and the rest for training a classifier:
@@ -237,7 +250,7 @@ class LeaveOneOutCrossValidation(ValidationStrategy):
         """
         super(LeaveOneOutCrossValidation, self).__init__(model=model)
         self.logger = logging.getLogger("facerec.validation.LeaveOneOutCrossValidation")
-        
+
     def validate(self, X, y, description="ExperimentName"):
         """ Performs a LOOCV.
         
@@ -246,35 +259,36 @@ class LeaveOneOutCrossValidation(ValidationStrategy):
             y [1 x num_data] classes
         """
         #(X,y) = shuffle(X,y)
-        true_positives, false_positives, true_negatives, false_negatives = (0,0,0,0)
+        true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
         n = y.shape[0]
-        for i in range(0,n):
-            
-            self.logger.info("Processing fold %d/%d." % (i+1, n))
-            
+        for i in range(0, n):
+
+            self.logger.info("Processing fold %d/%d." % (i + 1, n))
+
             # create train index list
             trainIdx = []
-            trainIdx.extend(range(0,i))
-            trainIdx.extend(range(i+1,n))
-            
+            trainIdx.extend(range(0, i))
+            trainIdx.extend(range(i + 1, n))
+
             # build training data/test data subset
             Xtrain = [X[t] for t in trainIdx]
             ytrain = y[trainIdx]
-            
+
             # compute the model
             self.model.compute(Xtrain, ytrain)
-            
+
             # get prediction
             prediction = self.model.predict(X[i])[0]
             if prediction == y[i]:
                 true_positives = true_positives + 1
             else:
                 false_positives = false_positives + 1
-                
+
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
-    
+
     def __repr__(self):
         return "Leave-One-Out Cross Validation (model=%s)" % (self.model)
+
 
 class LeaveOneClassOutCrossValidation(ValidationStrategy):
     """ Leave-One-Cross Validation (LOOCV) uses one observation for testing and the rest for training a classifier:
@@ -297,25 +311,25 @@ class LeaveOneClassOutCrossValidation(ValidationStrategy):
         """
         super(LeaveOneClassOutCrossValidation, self).__init__(model=model)
         self.logger = logging.getLogger("facerec.validation.LeaveOneClassOutCrossValidation")
-        
+
     def validate(self, X, y, g, description="ExperimentName"):
         """
         TODO Add example and refactor into proper interface declaration.
         """
-        true_positives, false_positives, true_negatives, false_negatives = (0,0,0,0)
-        
-        for i in range(0,len(np.unique(y))):
+        true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
+
+        for i in range(0, len(np.unique(y))):
             self.logger.info("Validating Class %s." % i)
             # create folds
-            trainIdx = np.where(y!=i)[0]
-            testIdx = np.where(y==i)[0]
+            trainIdx = np.where(y != i)[0]
+            testIdx = np.where(y == i)[0]
             # build training data/test data subset
             Xtrain = [X[t] for t in trainIdx]
             gtrain = g[trainIdx]
-            
+
             # Compute the model, this time on the group:
             self.model.compute(Xtrain, gtrain)
-            
+
             for j in testIdx:
                 # get prediction
                 prediction = self.model.predict(X[j])[0]
@@ -324,13 +338,15 @@ class LeaveOneClassOutCrossValidation(ValidationStrategy):
                 else:
                     false_positives = false_positives + 1
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
-    
+
     def __repr__(self):
         return "Leave-One-Class-Out Cross Validation (model=%s)" % (self.model)
+
 
 class SimpleValidation(ValidationStrategy):
     """Implements a simple Validation, which allows you to partition the data yourself.
     """
+
     def __init__(self, model):
         """
         Args:
@@ -349,12 +365,12 @@ class SimpleValidation(ValidationStrategy):
             y [1 x num_data] classes
         """
         self.logger.info("Simple Validation.")
-       
+
         self.model.compute(Xtrain, ytrain)
 
         self.logger.debug("Model computed.")
 
-        true_positives, false_positives, true_negatives, false_negatives = (0,0,0,0)
+        true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
         count = 0
         for i in ytest:
             self.logger.debug("Predicting %s/%s." % (count, len(ytest)))

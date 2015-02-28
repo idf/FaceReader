@@ -2,17 +2,19 @@ import numpy as np
 import random
 from scipy import ndimage
 
+
 def read_image(filename):
     imarr = np.array([])
     try:
         im = Image.open(os.path.join(filename))
-        im = im.convert("L") # convert to greyscale
+        im = im.convert("L")  # convert to greyscale
         imarr = np.array(im, dtype=np.uint8)
     except IOError as (errno, strerror):
         print "I/O error({0}): {1}".format(errno, strerror)
     except:
         print "Cannot open image."
     return imarr
+
 
 def asRowMatrix(X):
     """
@@ -27,8 +29,9 @@ def asRowMatrix(X):
         total = total * X[0].shape[i]
     mat = np.empty([0, total], dtype=X[0].dtype)
     for row in X:
-        mat = np.append(mat, row.reshape(1,-1), axis=0) # same as vstack
+        mat = np.append(mat, row.reshape(1, -1), axis=0)  # same as vstack
     return np.asmatrix(mat)
+
 
 def asColumnMatrix(X):
     """
@@ -43,7 +46,7 @@ def asColumnMatrix(X):
         total = total * X[0].shape[i]
     mat = np.empty([total, 0], dtype=X[0].dtype)
     for col in X:
-        mat = np.append(mat, col.reshape(-1,1), axis=1) # same as hstack
+        mat = np.append(mat, col.reshape(-1, 1), axis=1)  # same as hstack
     return np.asmatrix(mat)
 
 
@@ -65,22 +68,25 @@ def minmax_normalize(X, low, high, minX=None, maxX=None, dtype=np.float):
     X = X - minX
     X = X / (maxX - minX)
     # Scale to [low...high].
-    X = X * (high-low)
+    X = X * (high - low)
     X = X + low
     return np.asarray(X, dtype=dtype)
+
 
 def zscore(X):
     X = np.asanyarray(X)
     mean = X.mean()
-    std = X.std() 
-    X = (X-mean)/std
+    std = X.std()
+    X = (X - mean) / std
     return X, mean, std
 
-def shuffle(X,y):
-    idx = np.argsort([random.random() for i in xrange(y.shape[0])])
-    return X[:,idx], y[idx]
 
-def shuffle_array(X,y):
+def shuffle(X, y):
+    idx = np.argsort([random.random() for i in xrange(y.shape[0])])
+    return X[:, idx], y[idx]
+
+
+def shuffle_array(X, y):
     """ Shuffles two arrays!
     """
     idx = np.argsort([random.random() for i in xrange(len(y))])

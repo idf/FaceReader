@@ -32,25 +32,25 @@ import numpy as np
 import cv2
 
 
-def Mulscl_lbp_feature(image, radius, neighbors, scale, scale_step, winsize, stride):
-    '''
-    detect the multi scale lbp feature of the image, 
+def multi_scale_lbp_feature(image, radius, neighbors, scale, scale_step, winsize, stride):
+    """
+    detect the multi scale lbp feature of the image,
     with a patch size (2*winsize+1)*(2*winsize+1)
     scale: the total layer of the image pyramid
     scale_step: the scaling between the adjacent layer
     stride: the stride of the  sliding window
     radius: the radius of the circle
     neighbors: the sample numbers in a circle
-    
+
     feature: return an array, row:the number of the patch
                              col:lbp feature dim*scale
-    
+
     eg:
       feature=Mulscl_lbp_feature(image,1,8,4,1.25,25,2)
-    '''
+    """
 
     # get the image pyramid
-    img_pyrmd = MulScl_image(image, scale, scale_step)
+    img_pyrmd = multi_scale_image(image, scale, scale_step)
 
     # a mapping table for LBP u2 with 'neighbors' neighbors
     # mapping=getmapping(neighbors)
@@ -99,30 +99,30 @@ def Mulscl_lbp_feature(image, radius, neighbors, scale, scale_step, winsize, str
     dsize = int(np.ceil(winsize + radius) * (scale_step ** (scale - 1)))
 
     # the begin and end positions of the sliding window in the lbp feature at scale 0
-    #the row and column is begin from 0 here
+    # the row and column is begin from 0 here
     min_y = int(dsize)
     min_x = int(min_y)
     max_y = int(np.floor((ysize - dsize - 1 - min_y) / (stride + 1)) * (stride + 1) + min_y)
     max_x = int(np.floor((xsize - dsize - 1 - min_x) / (stride + 1)) * (stride + 1) + min_x)
 
-    #print max_x
-    #print max_y
-    #print min_x
+    # print max_x
+    # print max_y
+    # print min_x
 
-    #the number of the patches
+    # the number of the patches
     patch_num = int(((max_y - min_y) / (stride + 1) + 1) * ((max_x - min_x) / (stride + 1) + 1))
-    #print patch_num
+    # print patch_num
 
-    #the multicalse lbp feature
-    #the patch slide from the left to the right, up to down
+    # the multi scale lbp feature
+    # the patch slide from the left to the right, up to down
     Mulscl_lbp = np.zeros([patch_num, scale * (maxmapping + 1)])
 
     for s in range(scale):
 
-        #the lbp feature at scale s
+        # the lbp feature at scale s
         lbp_current = lbp_pyrmd[s]
 
-        #the number of the patch
+        # the number of the patch
         num = 0
 
         #the column in Mulscl_lbp
@@ -146,13 +146,13 @@ def Mulscl_lbp_feature(image, radius, neighbors, scale, scale_step, winsize, str
 
 
 def lbp(image, radius, neighbors, mapping):
-    '''
+    """
     LBP returns the LBP feature of an image.
     J = LBP(I,R,N,MAPPING,MODE) returns either a local binary pattern
     coded image or the local binary pattern histogram of an intensity
-    image I. The LBP codes are computed using N sampling points on a 
-    circle of radius R and using mapping table defined by MAPPING. 
-    '''
+    image I. The LBP codes are computed using N sampling points on a
+    circle of radius R and using mapping table defined by MAPPING.
+    """
     d_image = np.copy(image)
     d_image = d_image + 0.0
 
@@ -301,7 +301,7 @@ def NumberOfSetBits(i):
     return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24
 
 
-def MulScl_image(image, scale, scale_step):
+def multi_scale_image(image, scale, scale_step):
     # produce the image pyramid
     # image: the original image
     # scale: the scale of the image pyramid
@@ -338,11 +338,3 @@ def get_Hist(patch, maxvalue):
             hist[v] = hist[v] + 1
 
     return hist
-        
-    
-
-    
-
-
-    
-    

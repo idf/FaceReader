@@ -28,11 +28,12 @@ stride = 2
 # under this condition, the feature dimension is 816*236
 
 # dir_path: the path of the folder containing the image
-dir_path = 'E:\\GPforFR\\data\\lfw_p'
+orl_path = 'E:/GPforFR/data/orl_faces'
+lfw_path = 'E:/GPforFR/data/lfw_p'
 
 # dst_path: the path of the file saving the feature
-dst_path = 'E:\\GPforFR\\data\\lfw_feature'
-
+orl_dst_path = 'E:/GPforFR/data/orl_faces_feature'
+lfw_dst_path = 'E:/GPforFR/data/lfw_feature'
 
 def extract_feature(args):
     timer = Timer()
@@ -41,24 +42,40 @@ def extract_feature(args):
     img_path, ftr_name = args
     image = cv2.imread(img_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    if not os.path.exists(os.path.dirname(ftr_name)):
+        os.makedirs(os.path.dirname(ftr_name))
     out_file = open(ftr_name, 'w')
-    feature = Mulscl_lbp_feature(image, radius, nei, scale, scale_step, winsize, stride)
+    feature = multi_scale_lbp_feature(image, radius, nei, scale, scale_step, winsize, stride)
     pickle.dump(feature, out_file)
     out_file.close()
 
     print timer.end()
 
-if __name__=="__main__":
-    # Traversing files
+
+def extract(dir_path, dst_path, include_folder_name=False):
+    """
+    Traversing files
+    :param dir_path:
+    :param dst_path:
+    :param include_folder_name:
+    :return:
+    """
     p = Pool(4)
     for root, dirs, files in os.walk(dir_path):
         if files:
             load = []
             for f in files:
-                img_path = root + '\\' + f
-                ftr_name = os.path.join(dst_path, f.split('.')[0] + '.txt')
+                img_path = root + '/' + f
+                folder = "" 
+                if include_folder_name:
+                    folder = root.replace('/', '/').split('/')[-1]+'_'
+                ftr_name = os.path.join(dst_path, folder+f.split('.')[0] + '.txt')
                 load.append((img_path, ftr_name))
 
             p.map(extract_feature, load)
+            # extract_feature(load[0])
         print root
     p.close()
+
+if __name__=="__main__":
+    extract(orl_path, orl_dst_path, True)

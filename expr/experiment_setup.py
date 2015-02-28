@@ -43,6 +43,7 @@ def experiment(feature=Fisherfaces(), plot=None):
         sys.exit()
     # Now read in the image data. This must be a valid path!
     [X, y] = read_images(sys.argv[1])
+    # TODO move out logger
     # Then set up a handler for logging:
     handler = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -72,4 +73,4 @@ def experiment(feature=Fisherfaces(), plot=None):
 if __name__ == "__main__":
     # experiment(Fisherfaces(), plot_fisher)
     # experiment(SpatialHistogram(), None)
-    experiment(PCA(), None)
+    experiment(PCA(50), None)

@@ -5,16 +5,16 @@ class AbstractFeature(object):
 
     def compute(self,X,y):
         raise NotImplementedError("Every AbstractFeature must implement the compute method.")
-    
+
     def extract(self,X):
         raise NotImplementedError("Every AbstractFeature must implement the extract method.")
-        
+
     def save(self):
         raise NotImplementedError("Not implemented yet (TODO).")
-    
+
     def load(self):
         raise NotImplementedError("Not implemented yet (TODO).")
-        
+
     def __repr__(self):
         return "AbstractFeature"
 
@@ -26,13 +26,13 @@ class Identity(AbstractFeature):
     """
     def __init__(self):
         AbstractFeature.__init__(self)
-        
+
     def compute(self,X,y):
         return X
-    
+
     def extract(self,X):
         return X
-    
+
     def __repr__(self):
         return "Identity"
 
@@ -45,8 +45,16 @@ class PCA(AbstractFeature):
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
         self._num_components = num_components
-        
+
     def compute(self,X,y):
+        """
+        PCA over the entire images set
+        dimension reduction for entire images set
+
+        :param X: The images, which is a Python list of numpy arrays.
+        :param y: The corresponding labels (the unique number of the subject, person) in a Python list.
+        :return:
+        """
         # build the column matrix
         XC = asColumnMatrix(X)
         y = np.asarray(y)
@@ -72,11 +80,11 @@ class PCA(AbstractFeature):
             xp = self.project(x.reshape(-1,1))
             features.append(xp)
         return features
-    
+
     def extract(self,X):
         X = np.asarray(X).reshape(-1,1)
         return self.project(X)
-        
+
     def project(self, X):
         X = X - self._mean
         return np.dot(self._eigenvectors.T, X)
@@ -92,7 +100,7 @@ class PCA(AbstractFeature):
     @property
     def eigenvalues(self):
         return self._eigenvalues
-        
+
     @property
     def eigenvectors(self):
         return self._eigenvectors
@@ -100,7 +108,7 @@ class PCA(AbstractFeature):
     @property
     def mean(self):
         return self._mean
-        
+
     def __repr__(self):
         return "PCA (num_components=%d)" % (self._num_components)
 
@@ -116,7 +124,7 @@ class LDA(AbstractFeature):
         y = np.asarray(y)
         # calculate dimensions
         d = XC.shape[0]
-        c = len(np.unique(y))        
+        c = len(np.unique(y))
         # set a valid number of components
         if self._num_components <= 0:
             self._num_components = c-1
@@ -146,7 +154,7 @@ class LDA(AbstractFeature):
             xp = self.project(x.reshape(-1,1))
             features.append(xp)
         return features
-        
+
     def project(self, X):
         return np.dot(self._eigenvectors.T, X)
 
@@ -160,11 +168,11 @@ class LDA(AbstractFeature):
     @property
     def eigenvectors(self):
         return self._eigenvectors
-    
+
     @property
     def eigenvalues(self):
         return self._eigenvalues
-    
+
     def __repr__(self):
         return "LDA (num_components=%d)" % (self._num_components)
 
@@ -174,17 +182,17 @@ class Fisherfaces(AbstractFeature):
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
         self._num_components = num_components
-    
+
     def compute(self, X, y):
         # turn into numpy representation
-        Xc = asColumnMatrix(X)
+        XC = asColumnMatrix(X)
         y = np.asarray(y)
         # gather some statistics about the dataset
         n = len(y)
         c = len(np.unique(y))
         # define features to be extracted
-        pca = PCA(num_components = (n-c))
-        lda = LDA(num_components = self._num_components)
+        pca = PCA(num_components=(n-c))
+        lda = LDA(num_components=self._num_components)
         # fisherfaces are a chained feature of PCA followed by LDA
         model = ChainOperator(pca,lda)
         # computing the chained model then calculates both decompositions
@@ -207,18 +215,18 @@ class Fisherfaces(AbstractFeature):
 
     def project(self, X):
         return np.dot(self._eigenvectors.T, X)
-    
+
     def reconstruct(self, X):
         return np.dot(self._eigenvectors, X)
 
     @property
     def num_components(self):
         return self._num_components
-        
+
     @property
     def eigenvalues(self):
         return self._eigenvalues
-    
+
     @property
     def eigenvectors(self):
         return self._eigenvectors
@@ -236,7 +244,7 @@ class SpatialHistogram(AbstractFeature):
             raise TypeError("Only an operator of type facerec.lbp.LocalDescriptor is a valid lbp_operator.")
         self.lbp_operator = lbp_operator
         self.sz = sz
-        
+
     def compute(self,X,y):
         features = []
         for x in X:
@@ -244,7 +252,7 @@ class SpatialHistogram(AbstractFeature):
             h = self.spatially_enhanced_histogram(x)
             features.append(h)
         return features
-    
+
     def extract(self,X):
         X = np.asarray(X)
         return self.spatially_enhanced_histogram(X)
@@ -265,6 +273,6 @@ class SpatialHistogram(AbstractFeature):
                 # probably useful to apply a mapping?
                 E.extend(H)
         return np.asarray(E)
-    
+
     def __repr__(self):
         return "SpatialHistogram (operator=%s, grid=%s)" % (repr(self.lbp_operator), str(self.sz))

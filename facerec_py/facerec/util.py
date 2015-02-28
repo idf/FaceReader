@@ -35,7 +35,7 @@ def asRowMatrix(X):
 
 def asColumnMatrix(X):
     """
-    Creates a column-matrix from multi-dimensional data items in list l.
+    Creates a column-matrix from multi-dimensional data items in list X.
     
     X [list] List with multi-dimensional data.
     """

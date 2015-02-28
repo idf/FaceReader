@@ -226,7 +226,7 @@ class KFoldCrossValidation(ValidationStrategy):
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 
     def __repr__(self):
-        return "k-Fold Cross Validation (model=%s, k=%s)" % (self.model, self.k)
+        return "k-Fold Cross Validation (model=%s, k=%s, result=%s)" % (self.model, self.k, self.validation_results)
 
 
 class LeaveOneOutCrossValidation(ValidationStrategy):

@@ -1,3 +1,4 @@
 libsvm
 numpy
+scipy
 opencv

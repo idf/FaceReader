@@ -19,6 +19,13 @@ class ReadFile(object):
         if num == None:
             self.num = self.total
 
+    def __get_line_label(self, tmp, rand):
+        if rand:
+            line_label = random.sample(tmp, self.num)
+        else:
+            line_label = tmp[:self.num]
+        return line_label
+
     def person_pair(self):
         person = []
         tmp = range(2, self.total + 2)
@@ -26,11 +33,7 @@ class ReadFile(object):
         # process part of
         if self.num != self.total:
             # line_label: save the labels of the line to be processed
-            rand = False
-            if rand:
-                line_label = random.sample(tmp, self.num)
-            else:
-                line_label = tmp[:self.num]
+            line_label = self.__get_line_label(tmp, False)
 
             for i in line_label:
                 person.append(self.__extract_flnm(i))
@@ -47,7 +50,7 @@ class ReadFile(object):
 
         if self.num != self.total:
             # line_label: save the labels of the line to be processed
-            line_label = random.sample(tmp, self.num)
+            line_label = random.sample(tmp, self.num)  # TODO
 
             for i in range(len(line_label)):
                 person.append(self.__extract_flnm(line_label[i]))

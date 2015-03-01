@@ -230,8 +230,11 @@ class KFoldCrossValidation(ValidationStrategy):
 
     def __init__(self, model, k=10, threshold_up=1):
         """
-        Args:
-            k [int] number of folds in this k-fold cross-validation (default 10)
+
+        :param model:
+        :param k: [int] number of folds in this k-fold cross-validation (default 10)
+        :param threshold_up: threshold upper limit for ROC curve, range [0, 1]; 0 to disable ROC
+        :return:
         """
         super(KFoldCrossValidation, self).__init__(model=model)
         self.threshold_up = threshold_up

@@ -1,4 +1,5 @@
 from facerec_py.facerec.distance import EuclideanDistance
+from facerec_py.facerec.normalization import gaussian_dissim
 from facerec_py.facerec.util import asRowMatrix
 import logging
 import numpy as np
@@ -9,7 +10,7 @@ class AbstractClassifier(object):
 
     def compute(self,X,y):
         raise NotImplementedError("Every AbstractClassifier must implement the compute method.")
-    
+
     def predict(self,X):
         raise NotImplementedError("Every AbstractClassifier must implement the predict method.")
 
@@ -38,7 +39,7 @@ class NearestNeighbor(AbstractClassifier):
     def compute(self, X, y):
         self.X = X
         self.y = np.asarray(y)
-    
+
     def predict(self, q):
         """
         Predicts the k-nearest neighbor for a given query in q. 
@@ -80,20 +81,24 @@ class NearestNeighbor(AbstractClassifier):
         # Sort the labels and distances accordingly:
         sorted_y = self.y[idx]
         sorted_distances = distances[idx]
+        sorted_sim = gaussian_dissim(sorted_distances, sorted_distances.std())
         # Take only the k first items:
-        sorted_y = sorted_y[0:self.k]
-        sorted_distances = sorted_distances[0:self.k]
+        sorted_y = sorted_y[:self.k]
+        sorted_distances = sorted_distances[:self.k]
+        sorted_sim = sorted_sim[:self.k]
         # Make a histogram of them:
         hist = dict((key,val) for key, val in enumerate(np.bincount(sorted_y)) if val)
         # And get the bin with the maximum frequency:
         predicted_label = max(hist.iteritems(), key=op.itemgetter(1))[0]
+
+
         # A classifier should output a list with the label as first item and
         # generic data behind. The k-nearest neighbor classifier outputs the 
         # distance of the k first items. So imagine you have a 1-NN and you
         # want to perform a threshold against it, you should take the first
         # item 
-        return [predicted_label, { 'labels' : sorted_y, 'distances' : sorted_distances }]
-        
+        return [predicted_label, {'labels': sorted_y, 'distances': sorted_distances, 'similarities': sorted_sim}]
+
     def __repr__(self):
         return "NearestNeighbor (k=%s, dist_metric=%s)" % (self.k, repr(self.dist_metric))
 
@@ -140,16 +145,16 @@ class SVM(AbstractClassifier):
         self.param = param
         if self.param is None:
             self.param = svm_parameter("-q")
-    
+
     def compute(self, X, y):
         self.logger.debug("SVM TRAINING (C=%.2f,gamma=%.2f,p=%.2f,nu=%.2f,coef=%.2f,degree=%.2f)" % (self.param.C, self.param.gamma, self.param.p, self.param.nu, self.param.coef0, self.param.degree))
         # turn data into a row vector (needed for libsvm)
         X = asRowMatrix(X)
         y = np.asarray(y)
-        problem = svm_problem(y, X.tolist())        
+        problem = svm_problem(y, X.tolist())
         self.svm = svm_train(problem, self.param)
         self.y = y
-    
+
     def predict(self, X):
         """
         
@@ -176,13 +181,13 @@ class SVM(AbstractClassifier):
                     field in the model structure.
         """
         X = np.asarray(X).reshape(1,-1)
-        sys.stdout=StringIO() 
+        sys.stdout=StringIO()
         p_lbl, p_acc, p_val = svm_predict([0], X.tolist(), self.svm)
         sys.stdout=bkp_stdout
         predicted_label = int(p_lbl[0])
-        return [predicted_label, { 'p_lbl' : p_lbl, 'p_acc' : p_acc, 'p_val' : p_val }]
-    
-    def __repr__(self):        
+        return [predicted_label, {'p_lbl': p_lbl, 'p_acc': p_acc, 'p_val': p_val}]
+
+    def __repr__(self):
         return "Support Vector Machine (kernel_type=%s, C=%.2f,gamma=%.2f,p=%.2f,nu=%.2f,coef=%.2f,degree=%.2f)" % (KERNEL_TYPE[self.param.kernel_type], self.param.C, self.param.gamma, self.param.p, self.param.nu, self.param.coef0, self.param.degree)
 
 

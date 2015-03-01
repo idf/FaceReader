@@ -31,7 +31,7 @@ def shuffle(X, y):
 
             Shuffled input arrays.
     """
-    idx = np.argsort([random.random() for i in xrange(len(y))])
+    idx = np.argsort([random.random() for _ in xrange(len(y))])  # Returns the indices that would sort an array.
     y = np.asarray(y)
     X = [X[i] for i in idx]
     y = y[idx]
@@ -158,12 +158,13 @@ class KFoldCrossValidation(ValidationStrategy):
     Please note: If there are less than k observations in a class, k is set to the minimum of observations available through all classes.
     """
 
-    def __init__(self, model, k=10):
+    def __init__(self, model, k=10, threshold=0.5):
         """
         Args:
             k [int] number of folds in this k-fold cross-validation (default 10)
         """
         super(KFoldCrossValidation, self).__init__(model=model)
+        self.threshold = threshold
         self.k = k
         self.logger = logging.getLogger("facerec.validation.KFoldCrossValidation")
 
@@ -178,19 +179,20 @@ class KFoldCrossValidation(ValidationStrategy):
         X, y = shuffle(X, y)
         c = len(np.unique(y))
         foldIndices = []
-        n = np.iinfo(np.int).max
+        n = np.iinfo(np.int).max  # n, min input data number for every class
         for i in range(0, c):
-            idx = np.where(y == i)[0]
+            idx = np.where(y == i)[0]  # for a specific class
             n = min(n, idx.shape[0])
             foldIndices.append(idx.tolist());
 
-            # I assume all folds to be of equal length, so the minimum
+        # I assume all folds to be of equal length, so the minimum
         # number of samples in a class is responsible for the number
         # of folds. This is probably not desired. Please adjust for
         # your use case.
         if n < self.k:
             self.k = n
 
+        # for ORL, n = 10
         foldSize = int(math.floor(n / self.k))
 
         true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
@@ -201,9 +203,10 @@ class KFoldCrossValidation(ValidationStrategy):
             # calculate indices
             l = int(i * foldSize)
             h = int((i + 1) * foldSize)
-            testIdx = slice_2d(foldIndices, cols=range(l, h), rows=range(0, c))
-            trainIdx = slice_2d(foldIndices, cols=range(0, l), rows=range(0, c))
-            trainIdx.extend(slice_2d(foldIndices, cols=range(h, n), rows=range(0, c)))
+            # partition [0, l, h, n)
+            testIdx = slice_2d(foldIndices, rows=range(0, c), cols=range(l, h))
+            trainIdx = slice_2d(foldIndices, rows=range(0, c), cols=range(0, l))
+            trainIdx.extend(slice_2d(foldIndices, rows=range(0, c), cols=range(h, n)))
 
             # build training data subset
             Xtrain = [X[t] for t in trainIdx]
@@ -215,18 +218,55 @@ class KFoldCrossValidation(ValidationStrategy):
             # so we should use a PredictionResult, instead of trying to do this by simply comparing
             # the predicted and actual class.
             #
-            # This is inteneded of the next version! Feel free to contribute.
+            # This is intended of the next version! Feel free to contribute.
+            predictions = {}
             for j in testIdx:
-                prediction = self.model.predict(X[j])[0]
-                if prediction == y[j]:
-                    true_positives += 1
-                else:
-                    false_positives += 1
+                predictions[j] = self.model.predict(X[j])
+
+            TP, FP, TN, FN = self.simple_evaluate(testIdx, predictions, y)
+            true_positives += TP
+            true_negatives += TN
+            false_positives += FP
+            false_negatives += FN
+
 
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 
+    def simple_evaluate(self, testIdX, predictions, y):
+        TP, FP, TN, FN = 0, 0, 0, 0
+        for j in testIdX:
+            prediction, info = predictions[j]
+            if prediction==y[j]:
+                TP += 1
+            else:
+                FP += 1
+        return TP, FP, TN, FN
+
+    def evaluate(self, testIdX, predictions, y, threshold):
+        TP, FP, TN, FN = 0, 0, 0, 0
+        for cls in np.unique(y):
+            # binary classification
+            for j in testIdX:
+                prediction, info = predictions[j]
+                score = np.sum(info['similarities'])/float(self.k)
+                if prediction==cls and score>threshold:  # positive
+                    if cls==y[j]:
+                        TP += 1
+                    else:
+                        FP += 1
+                else:  # negatives
+                    if cls==y[j]:
+                        FN += 1
+                    else:
+                        TN += 1
+        # then take average
+        c = len(np.unique(y))
+        return TP/c, FP/c, TN/c, FN/c
+
+
+
     def __repr__(self):
-        return "k-Fold Cross Validation (model=%s, k=%s, result=%s)" % (self.model, self.k, self.validation_results)
+        return "k-Fold Cross Validation (model=%s, k=%s, results=%s)" % (self.model, self.k, self.validation_results)
 
 
 class LeaveOneOutCrossValidation(ValidationStrategy):

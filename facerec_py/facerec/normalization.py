@@ -24,3 +24,21 @@ def zscore(X, mean=None, std=None):
         std = X.std()
     X = (X - mean) / std
     return X
+
+
+def gaussian(x, mu, sig):
+    return (1/(sig*np.sqrt(2*np.pi)))*\
+           np.exp(-(x-mu)**2/(2*sig**2))
+
+
+def inverse_dissim(dissim):
+    """
+
+    :param dissim: int or np.array
+    :return:
+    """
+    return 1./(1+dissim)
+
+
+def gaussian_dissim(x, sig):
+    return np.exp(-x**2/(2*sig**2))

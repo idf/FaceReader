@@ -67,7 +67,7 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    expr.experiment(Fisherfaces(14), expr.plot_fisher)
     # expr.experiment(SpatialHistogram(), None)
     # expr.experiment(PCA(50), None)
     # expr.experiment(GaborFilter(), None)

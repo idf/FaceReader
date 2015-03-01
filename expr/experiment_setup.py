@@ -10,7 +10,7 @@ from facerec_py.facerec.util import minmax_normalize
 from expr.read_dataset import read_images
 import numpy as np
 import matplotlib.cm as cm
-from expr.feature import Gabor
+from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
 
 __author__ = 'Danyang'
@@ -67,11 +67,8 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    # expr.experiment(Fisherfaces(), expr.plot_fisher)
-    # experiment(SpatialHistogram(), None)
-    # experiment(PCA(50), None)
-    # experiment(Gabor(), None)
-
-    for theta_r in [4, 6, 8, 10]:
-        for freq_t in [(0.05, 0.25), (0.05, 0.15, 0.25), (0.05, 0.15, 0.25, 0.35), (0.05, 0.15, 0.25, 0.35, 0.45)]:
-            expr.experiment(Gabor(freq_t, theta_r), None)
+    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    # expr.experiment(SpatialHistogram(), None)
+    # expr.experiment(PCA(50), None)
+    # expr.experiment(Gabor(), None)
+    # expr.experiment(GaborFisher(), None)

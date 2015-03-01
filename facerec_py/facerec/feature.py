@@ -3,10 +3,10 @@ import numpy as np
 
 class AbstractFeature(object):
 
-    def compute(self,X,y):
+    def compute(self, X, y):
         raise NotImplementedError("Every AbstractFeature must implement the compute method.")
 
-    def extract(self,X):
+    def extract(self, X):
         raise NotImplementedError("Every AbstractFeature must implement the extract method.")
 
     def save(self):

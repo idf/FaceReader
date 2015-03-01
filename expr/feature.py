@@ -1,3 +1,4 @@
+from expr.experiment_setup import Experiment
 from facerec_py.facerec import normalization
 from facerec_py.facerec.feature import *
 import matplotlib
@@ -14,7 +15,7 @@ __author__ = 'Danyang'
 
 
 class Gabor(AbstractFeature):
-    def __init__(self, freq_r=(0.05, 0.15, 0.25), theta_r=4, sigma_tuple=(1, 3)):
+    def __init__(self, freq_r=(0.05, 0.15, 0.25), theta_r=6, sigma_tuple=(1, 3)):
         AbstractFeature.__init__(self)
         self._freq_t = freq_r
         self._theta_r = theta_r
@@ -28,7 +29,7 @@ class Gabor(AbstractFeature):
                     kernel = np.real(gabor_kernel(frequency, theta=theta, sigma_x=sigma, sigma_y=sigma))
                     self._kernels.append(kernel)
 
-    def compute(self,X,y):
+    def compute(self, X, y):
         """
 
         :param X: The images, which is a Python list of numpy arrays.
@@ -40,7 +41,7 @@ class Gabor(AbstractFeature):
 
         features = []
         for x in X:
-            features.append(self.garbo_convolve(x))
+            features.append(self.garbo_feature(x))
         return features
 
     def extract(self, X):
@@ -49,10 +50,10 @@ class Gabor(AbstractFeature):
         :param X: a single test data
         :return:
         """
-        return self.garbo_convolve(X)
+        return self.garbo_feature(X)
 
-    def garbo_convolve(self, x):
-        feats = np.zeros((len(self._kernels), 2), dtype=np.double)
+    def garbo_feature(self, x):
+        feats = np.zeros((len(self._kernels), 2), dtype=np.float32)
         for k, kernel in enumerate(self._kernels):
             filtered = nd.convolve(x, kernel, mode='wrap')
             feats[k, 0] = filtered.mean()
@@ -61,6 +62,13 @@ class Gabor(AbstractFeature):
         for i in xrange(2):
             feats[:, i] = normalization.zscore(feats[:, i])  # needed?
 
+        return feats
+
+    def raw_convolve(self, x):
+        feats = np.zeros((len(self._kernels), x.size), dtype=np.float32)
+        for k, kernel in enumerate(self._kernels):
+            filtered = nd.convolve(x, kernel, mode='wrap')
+            feats[k, :] = filtered.reshape(1, -1)
         return feats
 
 
@@ -74,3 +82,22 @@ class Gabor(AbstractFeature):
 
 class LGBPHS(AbstractFeature):
     pass
+
+class GaborFisher(AbstractFeature):
+    def __init__(self):
+        AbstractFeature.__init__(self)
+        self._gabor = Gabor(theta_r=2, sigma_tuple=(1, ))  # decrease param; otherwise memory issue
+        self._gabor.garbo_feature = self._gabor.raw_convolve  # replace
+        self._fisher = Fisherfaces(14)
+
+    def compute(self, X, y):
+        model = ChainOperator(self._gabor, self._fisher)
+        return model.compute(X, y)
+
+    def extract(self, X):
+        model = ChainOperator(self._gabor, self._fisher)
+        return model.extract(X)
+
+    def __repr__(self):
+        return "GaborFisher"
+

@@ -14,7 +14,7 @@ from skimage.filter._gabor import gabor_kernel
 __author__ = 'Danyang'
 
 
-class Gabor(AbstractFeature):
+class GaborFilter(AbstractFeature):
     def __init__(self, freq_r=(0.05, 0.15, 0.25), theta_r=6, sigma_tuple=(1, 3)):
         AbstractFeature.__init__(self)
         self._freq_t = freq_r
@@ -77,16 +77,16 @@ class Gabor(AbstractFeature):
         return self._prop
 
     def __repr__(self):
-        return "Gabor (freq=%s, theta=%s)" % (str(self._freq_t), str(self._theta_r))
+        return "GaborFilter (freq=%s, theta=%s)" % (str(self._freq_t), str(self._theta_r))
 
 
 class LGBPHS(AbstractFeature):
     pass
 
-class GaborFisher(AbstractFeature):
+class GaborFilterFisher(AbstractFeature):
     def __init__(self):
         AbstractFeature.__init__(self)
-        self._gabor = Gabor(theta_r=2, sigma_tuple=(1, ))  # decrease param; otherwise memory issue
+        self._gabor = GaborFilter(theta_r=2, sigma_tuple=(1, ))  # decrease param; otherwise memory issue
         self._gabor.garbo_feature = self._gabor.raw_convolve  # replace
         self._fisher = Fisherfaces(14)
 
@@ -99,5 +99,5 @@ class GaborFisher(AbstractFeature):
         return model.extract(X)
 
     def __repr__(self):
-        return "GaborFisher"
+        return "GaborFilterFisher"
 

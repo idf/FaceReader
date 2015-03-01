@@ -70,5 +70,5 @@ if __name__ == "__main__":
     # expr.experiment(Fisherfaces(14), expr.plot_fisher)
     # expr.experiment(SpatialHistogram(), None)
     # expr.experiment(PCA(50), None)
-    # expr.experiment(Gabor(), None)
-    # expr.experiment(GaborFisher(), None)
+    # expr.experiment(GaborFilter(), None)
+    # expr.experiment(GaborFilterFisher(), None)

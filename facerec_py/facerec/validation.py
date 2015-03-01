@@ -98,8 +98,8 @@ class ValidationResult(object):
         res_precision = precision(self.true_positives, self.false_positives) * 100
         res_accuracy = accuracy(self.true_positives, self.true_negatives, self.false_positives,
                                 self.false_negatives) * 100
-        return "ValidationResult (Description=%s, Precision=%.2f%%, Accuracy=%.2f%%)" % (
-            self.description, res_precision, res_accuracy)
+        return "ValidationResult (Description=%s, Precision=%.2f%%, Accuracy=%.2f%%, TP=%d, TN=%d, FP=%d, FN=%d)" % (
+            self.description, res_precision, res_accuracy, self.true_positives, self.true_negatives, self.false_positives, self.false_negatives)
 
 
 class ValidationStrategy(object):
@@ -219,9 +219,9 @@ class KFoldCrossValidation(ValidationStrategy):
             for j in testIdx:
                 prediction = self.model.predict(X[j])[0]
                 if prediction == y[j]:
-                    true_positives = true_positives + 1
+                    true_positives += 1
                 else:
-                    false_positives = false_positives + 1
+                    false_positives += 1
 
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 

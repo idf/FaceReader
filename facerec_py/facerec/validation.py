@@ -1,10 +1,13 @@
-import numpy as np
+from __future__ import absolute_import
 import math as math
 import random as random
 import logging
 
+import numpy as np
+
 from facerec_py.facerec.model import PredictableModel
-from facerec_py.facerec.classifier import AbstractClassifier
+from util.commons_util.fundamentals.generators import frange
+
 
 # TODO The evaluation of a model should be completely moved to the generic ValidationStrategy. The specific Validation 
 # implementations should only care about partition the data, which would make a lot sense. Currently it is not
@@ -17,6 +20,50 @@ from facerec_py.facerec.classifier import AbstractClassifier
 #     Please be careful, when referring to the Performance Metrics at the moment, only the Precision is implemented,
 #       and the rest has no use at the moment. Due to the missing refactoring discussed above.
 #
+
+
+class TFPN(object):
+    def __init__(self, TP=0, FP=0, TN=0, FN=0):
+        self.rates = np.array([TP, FP, TN, FN], dtype=np.double)
+
+    @property
+    def TP(self):
+        return self.rates[0]
+
+    @TP.setter
+    def TP(self, value):
+        self.rates[0] = value
+
+    @property
+    def FP(self):
+        return self.rates[1]
+
+    @FP.setter
+    def FP(self, value):
+        self.rates[1] = value
+
+    @property
+    def TN(self):
+        return self.rates[2]
+
+    @TN.setter
+    def TN(self, value):
+        self.rates[2] = value
+
+    @property
+    def FN(self):
+        return self.rates[3]
+
+    @FN.setter
+    def FN(self, value):
+        self.rates[3] = value
+
+    def __add__(self, other):
+        return self.rates + other.rates
+
+    def __iadd__(self, other):
+        self.rates += other.rates
+        return self
 
 
 def shuffle(X, y):
@@ -94,12 +141,36 @@ class ValidationResult(object):
         self.false_negatives = false_negatives
         self.description = description
 
+    def __div(self, x, y):
+        """
+        to avoid RuntimeWarning: invalid value encountered in double_scalars
+        :param x:
+        :param y:
+        :return:
+        """
+        if y < 1e-15:
+            return 0.0
+        return x/y
+
+    @property
+    def TPR(self):
+        return self.__div(self.true_positives, self.true_positives+self.false_negatives)
+
+    @property
+    def FPR(self):
+        return self.__div(self.false_positives, self.false_positives+self.true_negatives)
+
+    @property
+    def recall(self):
+        return self.__div(self.true_positives, self.true_positives+self.false_negatives)
+
+    @property
+    def precision(self):
+        return self.__div(self.true_positives, self.true_positives+self.false_positives)
+
     def __repr__(self):
-        res_precision = precision(self.true_positives, self.false_positives) * 100
-        res_accuracy = accuracy(self.true_positives, self.true_negatives, self.false_positives,
-                                self.false_negatives) * 100
-        return "ValidationResult (Description=%s, Precision=%.2f%%, Accuracy=%.2f%%, TP=%d, TN=%d, FP=%d, FN=%d)" % (
-            self.description, res_precision, res_accuracy, self.true_positives, self.true_negatives, self.false_positives, self.false_negatives)
+        return "ValidationResult (Description=%s, Precision=%.2f%%, Recall=%.2f%%, TPR=%.2f%%, FPR=%.2f%%, TP=%d, TN=%d, FP=%d, FN=%d)" % (
+            self.description, self.precision*100, self.recall*100, self.TPR*100, self.FPR*100, self.true_positives, self.true_negatives, self.false_positives, self.false_negatives)
 
 
 class ValidationStrategy(object):
@@ -142,7 +213,6 @@ class ValidationStrategy(object):
     def __repr__(self):
         return "Validation Kernel (model=%s)" % (self.model)
 
-
 class KFoldCrossValidation(ValidationStrategy):
     """ 
     
@@ -158,13 +228,13 @@ class KFoldCrossValidation(ValidationStrategy):
     Please note: If there are less than k observations in a class, k is set to the minimum of observations available through all classes.
     """
 
-    def __init__(self, model, k=10, threshold=0.5):
+    def __init__(self, model, k=10, threshold_up=1):
         """
         Args:
             k [int] number of folds in this k-fold cross-validation (default 10)
         """
         super(KFoldCrossValidation, self).__init__(model=model)
-        self.threshold = threshold
+        self.threshold_up = threshold_up
         self.k = k
         self.logger = logging.getLogger("facerec.validation.KFoldCrossValidation")
 
@@ -195,9 +265,16 @@ class KFoldCrossValidation(ValidationStrategy):
         # for ORL, n = 10
         foldSize = int(math.floor(n / self.k))
 
-        true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
-        for i in range(0, self.k):
+        if self.threshold_up==0:
+            threshold_r = [0]
+        else:
+            threshold_r = frange(0, self.threshold_up, 0.01)
 
+        rates = {}
+        for threshold in threshold_r:
+            rates[threshold] = TFPN()
+
+        for i in range(0, self.k):
             self.logger.info("Processing fold %d/%d." % (i + 1, self.k))
 
             # calculate indices
@@ -214,56 +291,51 @@ class KFoldCrossValidation(ValidationStrategy):
 
             self.model.compute(Xtrain, ytrain)
 
-            # TODO I have to add the true_negatives and false_negatives. Models also need to support it,
-            # so we should use a PredictionResult, instead of trying to do this by simply comparing
-            # the predicted and actual class.
-            #
-            # This is intended of the next version! Feel free to contribute.
             predictions = {}
             for j in testIdx:
                 predictions[j] = self.model.predict(X[j])
 
-            TP, FP, TN, FN = self.simple_evaluate(testIdx, predictions, y)
-            true_positives += TP
-            true_negatives += TN
-            false_positives += FP
-            false_negatives += FN
+            for threshold in threshold_r:
+                if self.threshold_up==0:
+                    rates[threshold] += self.simple_evaluate(testIdx, predictions, y)
+                else:
+                    rates[threshold] += self.evaluate(testIdx, predictions, y, threshold)
 
-
-        self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
+        for threshold in threshold_r:
+            r = rates[threshold]
+            self.add(ValidationResult(r.TP, r.TN, r.FP, r.FN, threshold))
 
     def simple_evaluate(self, testIdX, predictions, y):
-        TP, FP, TN, FN = 0, 0, 0, 0
+        r = TFPN()
         for j in testIdX:
             prediction, info = predictions[j]
             if prediction==y[j]:
-                TP += 1
+                r.TP += 1
             else:
-                FP += 1
-        return TP, FP, TN, FN
+                r.FP += 1
+        return r
 
     def evaluate(self, testIdX, predictions, y, threshold):
-        TP, FP, TN, FN = 0, 0, 0, 0
+        r = TFPN()
         for cls in np.unique(y):
             # binary classification
             for j in testIdX:
                 prediction, info = predictions[j]
-                score = np.sum(info['similarities'])/float(self.k)
+                sims = info['similarities']
+                score = np.sum(sims)/float(sims.size)
                 if prediction==cls and score>threshold:  # positive
                     if cls==y[j]:
-                        TP += 1
+                        r.TP += 1
                     else:
-                        FP += 1
-                else:  # negatives
+                        r.FP += 1
+                else:  # negatives  # TODO
                     if cls==y[j]:
-                        FN += 1
+                        r.FN += 1
                     else:
-                        TN += 1
-        # then take average
-        c = len(np.unique(y))
-        return TP/c, FP/c, TN/c, FN/c
-
-
+                        r.TN += 1
+        # TODO then take average
+        # r.rates /= len(np.unique(y))
+        return r
 
     def __repr__(self):
         return "k-Fold Cross Validation (model=%s, k=%s, results=%s)" % (self.model, self.k, self.validation_results)

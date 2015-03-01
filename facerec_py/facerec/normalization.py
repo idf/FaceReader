@@ -26,19 +26,22 @@ def zscore(X, mean=None, std=None):
     return X
 
 
-def gaussian(x, mu, sig):
+def gaussian(X, mu, sig):
     return (1/(sig*np.sqrt(2*np.pi)))*\
-           np.exp(-(x-mu)**2/(2*sig**2))
+           np.exp(-(X-mu)**2/(2*sig**2))
 
 
-def inverse_dissim(dissim):
+def inverse_dissim(X):
     """
 
-    :param dissim: int or np.array
+    :param X: int or np.array
     :return:
     """
-    return 1./(1+dissim)
+    X = np.asarray(X)
+    X /= np.max(X)
+    return 1./(1+X)
 
 
-def gaussian_dissim(x, sig):
-    return np.exp(-x**2/(2*sig**2))
+def gaussian_dissim(X, sig):
+    X = np.asarray(X)
+    return np.exp(-X**2/(2*sig**2))

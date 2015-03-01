@@ -1,5 +1,5 @@
 from facerec_py.facerec.distance import EuclideanDistance
-from facerec_py.facerec.normalization import gaussian_dissim
+from facerec_py.facerec.normalization import gaussian_dissim, inverse_dissim
 from facerec_py.facerec.util import asRowMatrix
 import logging
 import numpy as np
@@ -81,7 +81,8 @@ class NearestNeighbor(AbstractClassifier):
         # Sort the labels and distances accordingly:
         sorted_y = self.y[idx]
         sorted_distances = distances[idx]
-        sorted_sim = gaussian_dissim(sorted_distances, sorted_distances.std())
+        # sorted_sim = gaussian_dissim(sorted_distances, sorted_distances.std())
+        sorted_sim = inverse_dissim(sorted_distances)
         # Take only the k first items:
         sorted_y = sorted_y[:self.k]
         sorted_distances = sorted_distances[:self.k]

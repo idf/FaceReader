@@ -7,21 +7,31 @@ import operator as op
 
 
 class AbstractClassifier(object):
-
-    def compute(self,X,y):
+    def compute(self, X, y):
         raise NotImplementedError("Every AbstractClassifier must implement the compute method.")
 
-    def predict(self,X):
+    def predict(self, X):
         raise NotImplementedError("Every AbstractClassifier must implement the predict method.")
 
-    def update(self,X,y):
+    def update(self, X, y):
         raise NotImplementedError("This Classifier is cannot be updated.")
+
+    def binary_predict(self, q, lbl):
+        """
+
+        :param q: feature
+        :param lbl: the specified class label
+        :return conf: confidence interval [0, 1]
+        :raise NotImplementedError:
+        """
+        raise NotImplementedError("The binary prediction is not implemented")
 
 
 class NearestNeighbor(AbstractClassifier):
     """
     Implements a k-Nearest Neighbor Model with a generic distance metric.
     """
+
     def __init__(self, dist_metric=EuclideanDistance(), k=1):
         AbstractClassifier.__init__(self)
         self.k = k
@@ -37,7 +47,7 @@ class NearestNeighbor(AbstractClassifier):
         self.y = np.append(self.y, y)
 
     def compute(self, X, y):
-        self.X = X
+        self.X = X  # lazy learner
         self.y = np.asarray(y)
 
     def predict(self, q):
@@ -70,7 +80,7 @@ class NearestNeighbor(AbstractClassifier):
         """
         distances = []
         for xi in self.X:
-            xi = xi.reshape(-1,1)
+            xi = xi.reshape(-1, 1)
             d = self.dist_metric(xi, q)
             distances.append(d)
         if len(distances) > len(self.y):
@@ -88,7 +98,7 @@ class NearestNeighbor(AbstractClassifier):
         sorted_distances = sorted_distances[:self.k]
         sorted_sim = sorted_sim[:self.k]
         # Make a histogram of them:
-        hist = dict((key,val) for key, val in enumerate(np.bincount(sorted_y)) if val)
+        hist = dict((key, val) for key, val in enumerate(np.bincount(sorted_y)) if val)
         # And get the bin with the maximum frequency:
         predicted_label = max(hist.iteritems(), key=op.itemgetter(1))[0]
 
@@ -99,6 +109,33 @@ class NearestNeighbor(AbstractClassifier):
         # want to perform a threshold against it, you should take the first
         # item 
         return [predicted_label, {'labels': sorted_y, 'distances': sorted_distances, 'similarities': sorted_sim}]
+
+    def binary_predict(self, q, lbl, sim):
+        """
+        For thresholding operations
+        :param q:
+        :param lbl:
+        """
+        distances = []
+        for xi in self.X:
+            xi = xi.reshape(-1, 1)
+            d = self.dist_metric(xi, q)
+            distances.append(d)
+        if len(distances)>len(self.y):
+            raise Exception("More distances than classes. Is your distance metric correct?")
+
+        distances = np.asarray(distances)
+        idx = np.argsort(distances)
+        sorted_y = self.y[idx]
+        sorted_distances = distances[idx]
+        sorted_sim = sim(sorted_distances)  # need entire space of distances to calculate similarities
+
+        idx = idx[sorted_y==lbl]
+        sorted_distances = sorted_distances[idx]
+        sorted_sim = sorted_sim[idx]
+
+
+        return [lbl, {'labels': [lbl, ], 'distances': sorted_distances, 'similarities': sorted_sim}]
 
     def __repr__(self):
         return "NearestNeighbor (k=%s, dist_metric=%s)" % (self.k, repr(self.dist_metric))
@@ -117,7 +154,7 @@ import sys
 from StringIO import StringIO
 from svmutil import *
 
-bkp_stdout=sys.stdout
+bkp_stdout = sys.stdout
 
 
 class SVM(AbstractClassifier):
@@ -148,7 +185,8 @@ class SVM(AbstractClassifier):
             self.param = svm_parameter("-q")
 
     def compute(self, X, y):
-        self.logger.debug("SVM TRAINING (C=%.2f,gamma=%.2f,p=%.2f,nu=%.2f,coef=%.2f,degree=%.2f)" % (self.param.C, self.param.gamma, self.param.p, self.param.nu, self.param.coef0, self.param.degree))
+        self.logger.debug("SVM TRAINING (C=%.2f,gamma=%.2f,p=%.2f,nu=%.2f,coef=%.2f,degree=%.2f)" % (
+            self.param.C, self.param.gamma, self.param.p, self.param.nu, self.param.coef0, self.param.degree))
         # turn data into a row vector (needed for libsvm)
         X = asRowMatrix(X)
         y = np.asarray(y)
@@ -181,14 +219,16 @@ class SVM(AbstractClassifier):
                     Note that the order of classes here is the same as 'model.label'
                     field in the model structure.
         """
-        X = np.asarray(X).reshape(1,-1)
-        sys.stdout=StringIO()
+        X = np.asarray(X).reshape(1, -1)
+        sys.stdout = StringIO()
         p_lbl, p_acc, p_val = svm_predict([0], X.tolist(), self.svm)
-        sys.stdout=bkp_stdout
+        sys.stdout = bkp_stdout
         predicted_label = int(p_lbl[0])
         return [predicted_label, {'p_lbl': p_lbl, 'p_acc': p_acc, 'p_val': p_val}]
 
     def __repr__(self):
-        return "Support Vector Machine (kernel_type=%s, C=%.2f,gamma=%.2f,p=%.2f,nu=%.2f,coef=%.2f,degree=%.2f)" % (KERNEL_TYPE[self.param.kernel_type], self.param.C, self.param.gamma, self.param.p, self.param.nu, self.param.coef0, self.param.degree)
+        return "Support Vector Machine (kernel_type=%s, C=%.2f,gamma=%.2f,p=%.2f,nu=%.2f,coef=%.2f,degree=%.2f)" % (
+            KERNEL_TYPE[self.param.kernel_type], self.param.C, self.param.gamma, self.param.p, self.param.nu,
+            self.param.coef0, self.param.degree)
 
 

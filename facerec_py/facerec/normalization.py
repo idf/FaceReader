@@ -3,13 +3,14 @@ import numpy as np
 
 def minmax(X, low, high, minX=None, maxX=None, dtype=np.float):
     X = np.asarray(X)
+    X = X.copy()
     if minX is None:
         minX = np.min(X)
     if maxX is None:
         maxX = np.max(X)
     # normalize to [0...1].    
-    X = X - float(minX)
-    X = X / float((maxX - minX))
+    X -= float(minX)
+    X /= float((maxX - minX))
     # scale to [low...high].
     X = X * (high - low)
     X = X + low
@@ -18,6 +19,7 @@ def minmax(X, low, high, minX=None, maxX=None, dtype=np.float):
 
 def zscore(X, mean=None, std=None):
     X = np.asarray(X)
+    X = X.copy()
     if mean is None:
         mean = X.mean()
     if std is None:
@@ -27,6 +29,7 @@ def zscore(X, mean=None, std=None):
 
 
 def gaussian(X, mu, sig):
+    X = X.copy()
     return (1/(sig*np.sqrt(2*np.pi)))*\
            np.exp(-(X-mu)**2/(2*sig**2))
 
@@ -38,10 +41,12 @@ def inverse_dissim(X):
     :return:
     """
     X = np.asarray(X)
-    X /= np.max(X)
+    X = X.copy()
+    X = minmax(X, 0, 10)
     return 1./(1+X)
 
 
 def gaussian_dissim(X, sig):
     X = np.asarray(X)
+    X = X.copy()
     return np.exp(-X**2/(2*sig**2))

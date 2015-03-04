@@ -294,15 +294,20 @@ class KFoldCrossValidation(ValidationStrategy):
 
             self.model.compute(Xtrain, ytrain)
 
-            predictions = {}
-            for j in testIdx:
-                predictions[j] = self.model.predict(X[j])
+            if self.threshold_up == 0:  # simple evaluation
+                predictions = {}
+                for j in testIdx:
+                    predictions[j] = self.model.predict(X[j])
 
-            for threshold in threshold_r:
-                if self.threshold_up==0:
-                    rates[threshold] += self.simple_evaluate(testIdx, predictions, y)
-                else:
-                    rates[threshold] += self.evaluate(testIdx, predictions, y, threshold)
+                rates[threshold] += self.simple_evaluate(testIdx, X, y)
+            else:  # binary evaluation
+                predictions = {}  # higher memory complexity
+                for lbl in np.unique(y):
+                    for j in testIdx:
+                        predictions[(lbl, j)] = self.model.binary_predict(X[j], lbl)
+
+                for threshold in threshold_r:
+                    rates[threshold] += self.binary_evaluate(testIdx, predictions, y, threshold)
 
         for threshold in threshold_r:
             r = rates[threshold]
@@ -318,25 +323,32 @@ class KFoldCrossValidation(ValidationStrategy):
                 r.FP += 1
         return r
 
-    def evaluate(self, testIdX, predictions, y, threshold):
+    def binary_evaluate(self, testIdX, predictions, y, threshold):
+        """
+        Binary classification thresholding strategy
+        :param testIdX:
+        :param predictions:
+        :param y:
+        :param threshold:
+        :return:
+        """
         r = TFPN()
-        for cls in np.unique(y):
-            # binary classification
+        for lbl in np.unique(y):
             for j in testIdX:
-                prediction, info = predictions[j]
+                _, info = predictions[(lbl, j)]
                 sims = info['similarities']
+                sims = sims[:1]  # to classifier instead
                 score = np.sum(sims)/float(sims.size)
-                if prediction==cls and score>threshold:  # positive
-                    if cls==y[j]:
+                if score>threshold:  # positive
+                    if lbl==y[j]:
                         r.TP += 1
                     else:
                         r.FP += 1
-                else:  # negatives  # TODO
-                    if cls==y[j]:
+                else:  # negatives
+                    if lbl==y[j]:
                         r.FN += 1
                     else:
                         r.TN += 1
-        # TODO then take average
         # r.rates /= len(np.unique(y))
         return r
 

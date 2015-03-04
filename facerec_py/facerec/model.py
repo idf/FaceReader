@@ -21,11 +21,6 @@ class PredictableModel(object):
         q = self.feature.extract(X)
         return self.classifier.predict(q)
 
-    def binary_predict(self, X, lbl, sim=inverse_dissim):
-        q = self.feature.extract(X)
-        return self.classifier.binary_predict(q, lbl, sim)
-
-
     def __repr__(self):
         feature_repr = repr(self.feature)
         classifier_repr = repr(self.classifier)

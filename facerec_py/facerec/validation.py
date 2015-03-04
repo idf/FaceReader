@@ -294,18 +294,13 @@ class KFoldCrossValidation(ValidationStrategy):
 
             self.model.compute(Xtrain, ytrain)
 
-            if self.threshold_up == 0:  # simple evaluation
-                predictions = {}
-                for j in testIdx:
-                    predictions[j] = self.model.predict(X[j])
+            predictions = {}
+            for j in testIdx:
+                predictions[j] = self.model.predict(X[j])
 
+            if self.threshold_up == 0:  # simple evaluation
                 rates[threshold] += self.simple_evaluate(testIdx, X, y)
             else:  # binary evaluation
-                predictions = {}  # higher memory complexity
-                for lbl in np.unique(y):
-                    for j in testIdx:
-                        predictions[(lbl, j)] = self.model.binary_predict(X[j], lbl)
-
                 for threshold in threshold_r:
                     rates[threshold] += self.binary_evaluate(testIdx, predictions, y, threshold)
 
@@ -335,8 +330,12 @@ class KFoldCrossValidation(ValidationStrategy):
         r = TFPN()
         for lbl in np.unique(y):
             for j in testIdX:
-                _, info = predictions[(lbl, j)]
+                _, info = predictions[j]
+                labels = info['labels']
+                idx = labels==lbl
+
                 sims = info['similarities']
+                sims = sims[idx]
                 sims = sims[:1]  # to classifier instead
                 score = np.sum(sims)/float(sims.size)
                 if score>threshold:  # positive

@@ -94,9 +94,9 @@ class NearestNeighbor(AbstractClassifier):
         # sorted_sim = gaussian_dissim(sorted_distances, sorted_distances.std())
         sorted_sim = inverse_dissim(sorted_distances)
         # Take only the k first items:
-        sorted_y = sorted_y[:self.k]
-        sorted_distances = sorted_distances[:self.k]
-        sorted_sim = sorted_sim[:self.k]
+        # sorted_y = sorted_y[:self.k]
+        # sorted_distances = sorted_distances[:self.k]
+        # sorted_sim = sorted_sim[:self.k]
         # Make a histogram of them:
         hist = dict((key, val) for key, val in enumerate(np.bincount(sorted_y)) if val)
         # And get the bin with the maximum frequency:
@@ -109,33 +109,6 @@ class NearestNeighbor(AbstractClassifier):
         # want to perform a threshold against it, you should take the first
         # item 
         return [predicted_label, {'labels': sorted_y, 'distances': sorted_distances, 'similarities': sorted_sim}]
-
-    def binary_predict(self, q, lbl, sim):
-        """
-        For thresholding operations
-        :param q:
-        :param lbl:
-        """
-        distances = []
-        for xi in self.X:
-            xi = xi.reshape(-1, 1)
-            d = self.dist_metric(xi, q)
-            distances.append(d)
-        if len(distances)>len(self.y):
-            raise Exception("More distances than classes. Is your distance metric correct?")
-
-        distances = np.asarray(distances)
-        idx = np.argsort(distances)
-        sorted_y = self.y[idx]
-        sorted_distances = distances[idx]
-        sorted_sim = sim(sorted_distances)  # need entire space of distances to calculate similarities
-
-        idx = idx[sorted_y==lbl]
-        sorted_distances = sorted_distances[idx]
-        sorted_sim = sorted_sim[idx]
-
-
-        return [lbl, {'labels': [lbl, ], 'distances': sorted_distances, 'similarities': sorted_sim}]
 
     def __repr__(self):
         return "NearestNeighbor (k=%s, dist_metric=%s)" % (self.k, repr(self.dist_metric))

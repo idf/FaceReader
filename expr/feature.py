@@ -8,7 +8,7 @@ from scipy import ndimage as nd
 
 from skimage import data
 from skimage.util import img_as_float
-from skimage.filter._gabor import gabor_kernel
+from skimage.filters import gabor_kernel  # from skimage.filter._gabor import gabor_kernel
 
 
 __author__ = 'Danyang'

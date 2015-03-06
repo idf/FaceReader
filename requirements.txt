@@ -1,4 +1,10 @@
-libsvm
-numpy
-scipy
-opencv
+libsvm==3.20
+matplotlib==1.4.3
+numpy==1.9.2
+opencv-python==2.4.11
+Pillow==2.7.0
+python-dateutil==2.4.1
+pytz==2014.10
+scikit-image==0.11.2
+scikit-learn==0.15.2
+scipy==0.15.1

@@ -64,13 +64,19 @@ class GaborFilter(AbstractFeature):
 
         return feats
 
-    def raw_convolve(self, x):
+    def convolve_to_col(self, x):
         feats = np.zeros((len(self._kernels), x.size), dtype=np.float32)
         for k, kernel in enumerate(self._kernels):
             filtered = nd.convolve(x, kernel, mode='wrap')
             feats[k, :] = filtered.reshape(1, -1)
         return feats
 
+    def raw_convolve(self, x):
+        feats = np.zeros((len(self._kernels), x.shape[0], x.shape[1]), dtype=np.float32)
+        for i, v in enumerate(self._kernels):
+            filtered = nd.convolve(x, v, mode='wrap')
+            feats[i, :, :] = filtered
+        return feats
 
     @property
     def prop(self):
@@ -79,6 +85,17 @@ class GaborFilter(AbstractFeature):
     def __repr__(self):
         return "GaborFilter (freq=%s, theta=%s)" % (str(self._freq_t), str(self._theta_r))
 
+
+class MultiScaleSpatialHistogram(SpatialHistogram):
+    def __init__(self, lbp_operator=ExtendedLBP(), sz=(8, 8)):
+        super(MultiScaleSpatialHistogram, self).__init__(lbp_operator, sz)
+
+    def spatially_enhanced_histogram(self, X):
+        hists = []
+        for x in X:
+            hist = super(MultiScaleSpatialHistogram, self).spatially_enhanced_histogram(x)
+            hists.append(hist)
+        return np.asarray(hists)
 
 class LGBPHS(AbstractFeature):
     def __init__(self):
@@ -89,7 +106,7 @@ class LGBPHS(AbstractFeature):
         super(LGBPHS, self).__init__()
         gabor = GaborFilter(theta_r=2, sigma_tuple=(1, ))
         gabor.garbo_feature = gabor.raw_convolve
-        lbp = SpatialHistogram()
+        lbp = MultiScaleSpatialHistogram()
 
         self._model = ChainOperator(gabor, lbp)
 
@@ -107,7 +124,7 @@ class GaborFilterFisher(AbstractFeature):
     def __init__(self):
         super(GaborFilterFisher, self).__init__()
         self._gabor = GaborFilter(theta_r=2, sigma_tuple=(1, ))  # decrease param; otherwise memory issue
-        self._gabor.garbo_feature = self._gabor.raw_convolve  # replace
+        self._gabor.garbo_feature = self._gabor.convolve_to_col  # replace
         self._fisher = Fisherfaces(14)
 
     def compute(self, X, y):

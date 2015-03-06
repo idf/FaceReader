@@ -248,7 +248,7 @@ class SpatialHistogram(AbstractFeature):
     def compute(self,X,y):
         features = []
         for x in X:
-            x = np.asarray(x)
+            x = np.asarray(x)  # x is the image, height * width
             h = self.spatially_enhanced_histogram(x)
             features.append(h)
         return features
@@ -259,7 +259,7 @@ class SpatialHistogram(AbstractFeature):
 
     def spatially_enhanced_histogram(self, X):
         # calculate the LBP image
-        L = self.lbp_operator(X)
+        L = self.lbp_operator(X)  # height * width
         # calculate the grid geometry
         lbp_height, lbp_width = L.shape
         grid_rows, grid_cols = self.sz

@@ -1,4 +1,7 @@
 import sys
+sys.path.append('/Users/Xingjia/Development/FaceReader')
+sys.path.append('/Users/Xingjia/Development/libsvm-3.20/python')
+sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python')
 
 from facerec_py.facerec.feature import *
 from facerec_py.facerec.distance import EuclideanDistance
@@ -10,11 +13,10 @@ from facerec_py.facerec.util import minmax_normalize
 from expr.read_dataset import read_images
 import numpy as np
 import matplotlib.cm as cm
-from expr.feature import *
+# from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
 
 __author__ = 'Danyang'
-
 
 class Experiment(object):
     def __init__(self):

@@ -1,10 +1,13 @@
-import numpy as np
+from __future__ import absolute_import
 import math as math
 import random as random
 import logging
 
+import numpy as np
+
 from facerec_py.facerec.model import PredictableModel
-from facerec_py.facerec.classifier import AbstractClassifier
+from util.commons_util.fundamentals.generators import frange
+
 
 # TODO The evaluation of a model should be completely moved to the generic ValidationStrategy. The specific Validation 
 # implementations should only care about partition the data, which would make a lot sense. Currently it is not
@@ -19,6 +22,50 @@ from facerec_py.facerec.classifier import AbstractClassifier
 #
 
 
+class TFPN(object):
+    def __init__(self, TP=0, FP=0, TN=0, FN=0):
+        self.rates = np.array([TP, FP, TN, FN], dtype=np.double)
+
+    @property
+    def TP(self):
+        return self.rates[0]
+
+    @TP.setter
+    def TP(self, value):
+        self.rates[0] = value
+
+    @property
+    def FP(self):
+        return self.rates[1]
+
+    @FP.setter
+    def FP(self, value):
+        self.rates[1] = value
+
+    @property
+    def TN(self):
+        return self.rates[2]
+
+    @TN.setter
+    def TN(self, value):
+        self.rates[2] = value
+
+    @property
+    def FN(self):
+        return self.rates[3]
+
+    @FN.setter
+    def FN(self, value):
+        self.rates[3] = value
+
+    def __add__(self, other):
+        return self.rates + other.rates
+
+    def __iadd__(self, other):
+        self.rates += other.rates
+        return self
+
+
 def shuffle(X, y):
     """ Shuffles two arrays by column (len(X) == len(y))
         
@@ -31,7 +78,7 @@ def shuffle(X, y):
 
             Shuffled input arrays.
     """
-    idx = np.argsort([random.random() for i in xrange(len(y))])
+    idx = np.argsort([random.random() for _ in xrange(len(y))])  # Returns the indices that would sort an array.
     y = np.asarray(y)
     X = [X[i] for i in idx]
     y = y[idx]
@@ -94,12 +141,36 @@ class ValidationResult(object):
         self.false_negatives = false_negatives
         self.description = description
 
+    def __div(self, x, y):
+        """
+        to avoid RuntimeWarning: invalid value encountered in double_scalars
+        :param x:
+        :param y:
+        :return:
+        """
+        if y < 1e-15:
+            return 0.0
+        return x/y
+
+    @property
+    def TPR(self):
+        return self.__div(self.true_positives, self.true_positives+self.false_negatives)
+
+    @property
+    def FPR(self):
+        return self.__div(self.false_positives, self.false_positives+self.true_negatives)
+
+    @property
+    def recall(self):
+        return self.__div(self.true_positives, self.true_positives+self.false_negatives)
+
+    @property
+    def precision(self):
+        return self.__div(self.true_positives, self.true_positives+self.false_positives)
+
     def __repr__(self):
-        res_precision = precision(self.true_positives, self.false_positives) * 100
-        res_accuracy = accuracy(self.true_positives, self.true_negatives, self.false_positives,
-                                self.false_negatives) * 100
-        return "ValidationResult (Description=%s, Precision=%.2f%%, Accuracy=%.2f%%, TP=%d, TN=%d, FP=%d, FN=%d)" % (
-            self.description, res_precision, res_accuracy, self.true_positives, self.true_negatives, self.false_positives, self.false_negatives)
+        return "ValidationResult (Description=%s, Precision=%.2f%%, Recall=%.2f%%, TPR=%.2f%%, FPR=%.2f%%, TP=%d, TN=%d, FP=%d, FN=%d)" % (
+            self.description, self.precision*100, self.recall*100, self.TPR*100, self.FPR*100, self.true_positives, self.true_negatives, self.false_positives, self.false_negatives)
 
 
 class ValidationStrategy(object):
@@ -142,7 +213,6 @@ class ValidationStrategy(object):
     def __repr__(self):
         return "Validation Kernel (model=%s)" % (self.model)
 
-
 class KFoldCrossValidation(ValidationStrategy):
     """ 
     
@@ -158,12 +228,16 @@ class KFoldCrossValidation(ValidationStrategy):
     Please note: If there are less than k observations in a class, k is set to the minimum of observations available through all classes.
     """
 
-    def __init__(self, model, k=10):
+    def __init__(self, model, k=10, threshold_up=1):
         """
-        Args:
-            k [int] number of folds in this k-fold cross-validation (default 10)
+
+        :param model:
+        :param k: [int] number of folds in this k-fold cross-validation (default 10)
+        :param threshold_up: threshold upper limit for ROC curve, range [0, 1]; 0 to disable ROC
+        :return:
         """
         super(KFoldCrossValidation, self).__init__(model=model)
+        self.threshold_up = threshold_up
         self.k = k
         self.logger = logging.getLogger("facerec.validation.KFoldCrossValidation")
 
@@ -178,32 +252,41 @@ class KFoldCrossValidation(ValidationStrategy):
         X, y = shuffle(X, y)
         c = len(np.unique(y))
         foldIndices = []
-        n = np.iinfo(np.int).max
+        n = np.iinfo(np.int).max  # n, min input data number for every class
         for i in range(0, c):
-            idx = np.where(y == i)[0]
+            idx = np.where(y == i)[0]  # for a specific class
             n = min(n, idx.shape[0])
             foldIndices.append(idx.tolist());
 
-            # I assume all folds to be of equal length, so the minimum
+        # I assume all folds to be of equal length, so the minimum
         # number of samples in a class is responsible for the number
         # of folds. This is probably not desired. Please adjust for
         # your use case.
         if n < self.k:
             self.k = n
 
+        # for ORL, n = 10
         foldSize = int(math.floor(n / self.k))
 
-        true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
-        for i in range(0, self.k):
+        if self.threshold_up==0:
+            threshold_r = [0]
+        else:
+            threshold_r = frange(0, self.threshold_up, 0.01)
 
+        rates = {}
+        for threshold in threshold_r:
+            rates[threshold] = TFPN()
+
+        for i in range(0, self.k):
             self.logger.info("Processing fold %d/%d." % (i + 1, self.k))
 
             # calculate indices
             l = int(i * foldSize)
             h = int((i + 1) * foldSize)
-            testIdx = slice_2d(foldIndices, cols=range(l, h), rows=range(0, c))
-            trainIdx = slice_2d(foldIndices, cols=range(0, l), rows=range(0, c))
-            trainIdx.extend(slice_2d(foldIndices, cols=range(h, n), rows=range(0, c)))
+            # partition [0, l, h, n)
+            testIdx = slice_2d(foldIndices, rows=range(0, c), cols=range(l, h))
+            trainIdx = slice_2d(foldIndices, rows=range(0, c), cols=range(0, l))
+            trainIdx.extend(slice_2d(foldIndices, rows=range(0, c), cols=range(h, n)))
 
             # build training data subset
             Xtrain = [X[t] for t in trainIdx]
@@ -211,22 +294,65 @@ class KFoldCrossValidation(ValidationStrategy):
 
             self.model.compute(Xtrain, ytrain)
 
-            # TODO I have to add the true_negatives and false_negatives. Models also need to support it,
-            # so we should use a PredictionResult, instead of trying to do this by simply comparing
-            # the predicted and actual class.
-            #
-            # This is inteneded of the next version! Feel free to contribute.
+            predictions = {}
             for j in testIdx:
-                prediction = self.model.predict(X[j])[0]
-                if prediction == y[j]:
-                    true_positives += 1
-                else:
-                    false_positives += 1
+                predictions[j] = self.model.predict(X[j])
 
-        self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
+            if self.threshold_up == 0:  # simple evaluation
+                rates[threshold] += self.simple_evaluate(testIdx, X, y)
+            else:  # binary evaluation
+                for threshold in threshold_r:
+                    rates[threshold] += self.binary_evaluate(testIdx, predictions, y, threshold)
+
+        for threshold in threshold_r:
+            r = rates[threshold]
+            self.add(ValidationResult(r.TP, r.TN, r.FP, r.FN, threshold))
+
+    def simple_evaluate(self, testIdX, predictions, y):
+        r = TFPN()
+        for j in testIdX:
+            prediction, info = predictions[j]
+            if prediction==y[j]:
+                r.TP += 1
+            else:
+                r.FP += 1
+        return r
+
+    def binary_evaluate(self, testIdX, predictions, y, threshold):
+        """
+        Binary classification thresholding strategy
+        :param testIdX:
+        :param predictions:
+        :param y:
+        :param threshold:
+        :return:
+        """
+        r = TFPN()
+        for lbl in np.unique(y):
+            for j in testIdX:
+                _, info = predictions[j]
+                labels = info['labels']
+                idx = labels==lbl
+
+                sims = info['similarities']
+                sims = sims[idx]
+                sims = sims[:1]  # to classifier instead
+                score = np.sum(sims)/float(sims.size)
+                if score>threshold:  # positive
+                    if lbl==y[j]:
+                        r.TP += 1
+                    else:
+                        r.FP += 1
+                else:  # negatives
+                    if lbl==y[j]:
+                        r.FN += 1
+                    else:
+                        r.TN += 1
+        # r.rates /= len(np.unique(y))
+        return r
 
     def __repr__(self):
-        return "k-Fold Cross Validation (model=%s, k=%s, result=%s)" % (self.model, self.k, self.validation_results)
+        return "k-Fold Cross Validation (model=%s, k=%s, results=%s)" % (self.model, self.k, self.validation_results)
 
 
 class LeaveOneOutCrossValidation(ValidationStrategy):

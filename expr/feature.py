@@ -87,17 +87,17 @@ class LGBPHS(AbstractFeature):
         :return:
         """
         super(LGBPHS, self).__init__()
-        self._gabor= GaborFilter(theta_r=2, sigma_tuple=(1, ))
-        self._gabor.garbo_feature = self._gabor.raw_convolve
-        self._lbp = SpatialHistogram()
+        gabor = GaborFilter(theta_r=2, sigma_tuple=(1, ))
+        gabor.garbo_feature = gabor.raw_convolve
+        lbp = SpatialHistogram()
+
+        self._model = ChainOperator(gabor, lbp)
 
     def compute(self, X, y):
-        model = ChainOperator(self._gabor, self._lbp)
-        return model.compute(X, y)
+        return self._model.compute(X, y)
 
     def extract(self, X):
-        model = ChainOperator(self._gabor, self._lbp)
-        return model.extract(X)
+        return self._model.extract(X)
 
     def __repr__(self):
         return "LGBPHS"

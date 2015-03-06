@@ -58,7 +58,7 @@ class Experiment(object):
         if plot:
             plot(X, model)
         # Perform a 10-fold cross validation
-        cv = KFoldCrossValidation(model, k=10)
+        cv = KFoldCrossValidation(model, k=10, threshold_up=0)
         cv.validate(X, y)
 
         # And print the result:
@@ -72,3 +72,4 @@ if __name__ == "__main__":
     # expr.experiment(PCA(50), None)
     # expr.experiment(GaborFilter(), None)
     # expr.experiment(GaborFilterFisher(), None)
+    # expr.experiment(LGBPHS(), None)

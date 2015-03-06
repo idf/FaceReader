@@ -299,7 +299,7 @@ class KFoldCrossValidation(ValidationStrategy):
                 predictions[j] = self.model.predict(X[j])
 
             if self.threshold_up == 0:  # simple evaluation
-                rates[threshold] += self.simple_evaluate(testIdx, X, y)
+                rates[threshold] += self.simple_evaluate(testIdx, predictions, y)
             else:  # binary evaluation
                 for threshold in threshold_r:
                     rates[threshold] += self.binary_evaluate(testIdx, predictions, y, threshold)

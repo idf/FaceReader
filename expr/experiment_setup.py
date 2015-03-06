@@ -43,7 +43,7 @@ class Experiment(object):
         # the tutorial coming with this source code on how to prepare
         # your image data:
         if len(sys.argv) < 2:
-            print "USAGE: facerec_demo.py </path/to/images>"
+            print "USAGE: experiment_setup.py </path/to/images>"
             sys.exit()
         # Now read in the image data. This must be a valid path!
         [X, y] = read_images(sys.argv[1])
@@ -67,9 +67,9 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
     # expr.experiment(SpatialHistogram(), None)
     # expr.experiment(PCA(50), None)
-    # expr.experiment(GaborFilter(), None)
+    expr.experiment(GaborFilter(), None)
     # expr.experiment(GaborFilterFisher(), None)
     # expr.experiment(LGBPHS(), None)

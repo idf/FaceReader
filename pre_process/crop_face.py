@@ -86,8 +86,9 @@ def CropFace(image, eye_left=(0,0), eye_right=(0,0), offset_pct=(0.2,0.2), dest_
   return image
   
 if __name__ == "__main__":
-  dir = os.path.dirname(os.path.realpath(__file__))
-  dir = os.path.join(dir, "yalefaces")
+  #dir = os.path.dirname(os.path.realpath(__file__))
+  #dir = os.path.join(dir, "yalefaces")
+  dir = sys.argv[1]
   input = open('eyeCord.txt')
   cur = 'nil'
   pre = 'nil'
@@ -100,6 +101,7 @@ if __name__ == "__main__":
       #a1=arr[0]
       # if s is null, break
       if(not s):
+        print "done!"
         break
       x1=parameter[1]
       left1 = string.atoi(x1)

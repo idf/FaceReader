@@ -1,3 +1,3 @@
-- make sure crop_face.py and eyeCord.txt are in the same folder as yalefaces
-- run it from IDLE
+- open cmd and change directory to pre_process
+- enter "python crop_face.py [your yaleface directory]"
 - it will create sub folders under yalefaces eg. subject01 and save cropped image inside each respective folder

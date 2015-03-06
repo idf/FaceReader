@@ -1,14 +1,9 @@
-from expr.experiment_setup import Experiment
-from facerec_py.facerec import normalization
-from facerec_py.facerec.feature import *
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as nd
-
-from skimage import data
-from skimage.util import img_as_float
 from skimage.filters import gabor_kernel  # from skimage.filter._gabor import gabor_kernel
+
+from facerec_py.facerec import normalization
+from facerec_py.facerec.feature import *
 
 
 __author__ = 'Danyang'
@@ -96,6 +91,7 @@ class MultiScaleSpatialHistogram(SpatialHistogram):
             hist = super(MultiScaleSpatialHistogram, self).spatially_enhanced_histogram(x)
             hists.append(hist)
         return np.asarray(hists)
+
 
 class LGBPHS(AbstractFeature):
     def __init__(self):

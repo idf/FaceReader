@@ -238,7 +238,15 @@ from facerec_py.facerec.lbp import LocalDescriptor, ExtendedLBP
 
 
 class SpatialHistogram(AbstractFeature):
-    def __init__(self, lbp_operator=ExtendedLBP(), sz = (8,8)):
+    def __init__(self, lbp_operator=ExtendedLBP(), sz=(8, 8)):
+        """
+        Instead of doing one histogram for the whole picture, slice the image into mxn (sz) smaller patches, and make a
+        histogram for that patch only. And append those small histograms to a single one to form the spatial histogram
+
+        :param lbp_operator:
+        :param sz: rows * cols for non-overlapping sub-regions of a picture
+        :return:
+        """
         AbstractFeature.__init__(self)
         if not isinstance(lbp_operator, LocalDescriptor):
             raise TypeError("Only an operator of type facerec.lbp.LocalDescriptor is a valid lbp_operator.")

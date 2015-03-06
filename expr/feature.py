@@ -81,11 +81,31 @@ class GaborFilter(AbstractFeature):
 
 
 class LGBPHS(AbstractFeature):
-    pass
+    def __init__(self):
+        """
+        Un-weighted Local Gabor Binary Pattern Histogram Sequence
+        :return:
+        """
+        super(LGBPHS, self).__init__()
+        self._gabor= GaborFilter(theta_r=2, sigma_tuple=(1, ))
+        self._gabor.garbo_feature = self._gabor.raw_convolve
+        self._lbp = SpatialHistogram()
+
+    def compute(self, X, y):
+        model = ChainOperator(self._gabor, self._lbp)
+        return model.compute(X, y)
+
+    def extract(self, X):
+        model = ChainOperator(self._gabor, self._lbp)
+        return model.extract(X)
+
+    def __repr__(self):
+        return "LGBPHS"
+
 
 class GaborFilterFisher(AbstractFeature):
     def __init__(self):
-        AbstractFeature.__init__(self)
+        super(GaborFilterFisher, self).__init__()
         self._gabor = GaborFilter(theta_r=2, sigma_tuple=(1, ))  # decrease param; otherwise memory issue
         self._gabor.garbo_feature = self._gabor.raw_convolve  # replace
         self._fisher = Fisherfaces(14)

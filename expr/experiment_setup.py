@@ -10,6 +10,8 @@ from facerec_py.facerec.util import minmax_normalize
 from expr.read_dataset import read_images
 import numpy as np
 import matplotlib.cm as cm
+import matplotlib.pyplot as pyplot
+import re
 from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
 
@@ -28,6 +30,8 @@ class Experiment(object):
         # Plot them and store the plot to "python_fisherfaces_fisherfaces.pdf"
         subplot(title="Fisherfaces", images=E, rows=4, cols=4, sptitle="Fisherface", colormap=cm.jet,
                 filename="fisherfaces.png")
+        # Close current figure
+        pyplot.close()
 
 
     def experiment(self, feature=Fisherfaces(), plot=None):
@@ -63,7 +67,33 @@ class Experiment(object):
 
         # And print the result:
         print cv
+        return cv
 
+    def plot_roc(self, cv):
+        # Convert to string
+        temp_result = repr(cv)
+        # Extract FPR
+        raw_fpr = re.findall(r'FPR=\d+\.\d+%', temp_result)
+        string_fpr = repr(raw_fpr)
+        temp_fpr = re.findall(r'\d+\.\d+', string_fpr)
+        fpr = map(float, temp_fpr)
+        myDividend = 100.00
+        true_fpr = [x / myDividend for x in fpr]
+        # Extract TPR
+        raw_tpr = re.findall(r'TPR=\d+\.\d+%', temp_result)
+        string_tpr = repr(raw_tpr)
+        temp_tpr = re.findall(r'\d+\.\d+', string_tpr)
+        tpr = map(float, temp_tpr)
+        true_tpr = [x / myDividend for x in tpr]
+        print true_fpr
+        print true_tpr
+        # Plot ROC
+        pyplot.figure(2)
+        # pyplot.axis([-0.01, 1.0, 0.95, 1.01])
+        # ax = pyplot.gca()
+        # ax.set_autoscale_on(False)
+        pyplot.plot(true_fpr, true_tpr, 'g')
+        pyplot.show()
 
 if __name__ == "__main__":
     expr = Experiment()

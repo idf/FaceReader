@@ -168,6 +168,17 @@ class ValidationResult(object):
     def precision(self):
         return self.__div(self.true_positives, self.true_positives+self.false_positives)
 
+    @property
+    def total(self):
+        return self.true_negatives+self.true_positives+self.false_negatives+self.false_positives
+    @property
+    def accuracy(self):
+        return self.__div(self.true_positives+self.true_negatives, self.total)
+
+    @property
+    def F1(self):
+        return self.__div(2*self.precision*self.recall, self.precision+self.recall)
+
     def __repr__(self):
         return "ValidationResult (Description=%s, Precision=%.2f%%, Recall=%.2f%%, TPR=%.2f%%, FPR=%.2f%%, TP=%d, TN=%d, FP=%d, FN=%d)" % (
             self.description, self.precision*100, self.recall*100, self.TPR*100, self.FPR*100, self.true_positives, self.true_negatives, self.false_positives, self.false_negatives)

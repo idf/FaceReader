@@ -60,7 +60,7 @@ class Experiment(object):
         # Perform a 10-fold cross validation
         k = len(np.unique(y))
         if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=0)
+        cv = KFoldCrossValidation(model, k=k, threshold_up=1)
         cv.validate(X, y)
 
         # And print the result:

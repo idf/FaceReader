@@ -26,7 +26,7 @@ class GaborFilter(AbstractFeature):
 
     def compute(self, X, y):
         """
-
+        convention: cap X, small y
         :param X: The images, which is a Python list of numpy arrays.
         :param y: The corresponding labels (the unique number of the subject, person) in a Python list.
         :return:

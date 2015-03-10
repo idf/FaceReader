@@ -1,5 +1,5 @@
 from facerec_py.facerec.distance import EuclideanDistance
-from facerec_py.facerec.normalization import gaussian_dissim, inverse_dissim
+from facerec_py.facerec.normalization import gaussian_kernel, inverse_dissim
 from facerec_py.facerec.util import asRowMatrix
 import logging
 import numpy as np

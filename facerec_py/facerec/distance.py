@@ -24,7 +24,7 @@ class EuclideanDistance(AbstractDistance):
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
         q = np.asarray(q).flatten()
-        return np.sqrt(np.sum(np.power((p-q),2)))
+        return np.sqrt(np.sum(np.power(p-q, 2)))
 
 
 class CosineDistance(AbstractDistance):

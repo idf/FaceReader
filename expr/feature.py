@@ -5,6 +5,7 @@ from skimage.filters import gabor_kernel  # from skimage.filter._gabor import ga
 from facerec_py.facerec import normalization
 from facerec_py.facerec.feature import *
 import cv2
+from util.commons_util.decorators.algorithms import memoize, memoize_force
 
 __author__ = 'Danyang'
 
@@ -138,6 +139,9 @@ class GaborFilterCv2(AbstractFeature):
     def filter(self, x):
         return self.fractalius_filter(x)
 
+    def normalize(self, mul, kernel):
+        return kernel / (mul*kernel.sum())
+
     def simple_filter(self, x):
         """
         Simple Gabor Convolve
@@ -146,8 +150,7 @@ class GaborFilterCv2(AbstractFeature):
         """
         feats = np.zeros((len(self._kernels), x.shape[0], x.shape[1]), dtype=np.float32)
         for i, kernel in enumerate(self._kernels):
-            k = kernel.copy()
-            k /= k.sum()
+            k = self.normalize(1, kernel)
             filtered = cv2.filter2D(x, cv2.CV_8UC3, k)
             feats[i, :, :] = filtered
         return feats
@@ -164,8 +167,7 @@ class GaborFilterCv2(AbstractFeature):
 
         accum = np.zeros_like(x)
         for i, kernel in enumerate(self._kernels):
-            k = kernel.copy()
-            k /= 1.5*k.sum()
+            k = self.normalize(1.5, kernel)
             filtered = cv2.filter2D(x, cv2.CV_8UC3, k)
             np.maximum(accum, filtered, accum)
 

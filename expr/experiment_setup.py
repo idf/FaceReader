@@ -11,6 +11,7 @@ from facerec_py.facerec.validation import KFoldCrossValidation
 from facerec_py.facerec.visual import subplot
 from facerec_py.facerec.util import minmax_normalize
 from expr.read_dataset import read_images
+from expr.nda import *
 import numpy as np
 import matplotlib.cm as cm
 # from expr.feature import *
@@ -48,6 +49,7 @@ class Experiment(object):
             print "USAGE: facerec_demo.py </path/to/images>"
             sys.exit()
         # Now read in the image data. This must be a valid path!
+        # X: the data, y: number of classes
         [X, y] = read_images(sys.argv[1])
         # Define a 1-NN classifier with Euclidean Distance:
         classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=1)
@@ -69,7 +71,9 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    # expr.experiment(Fisherfaces(14), None)
+    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    expr.experiment(NDAFisher(), None)
     # expr.experiment(SpatialHistogram(), None)
     # expr.experiment(PCA(50), None)
     # expr.experiment(GaborFilter(), None)

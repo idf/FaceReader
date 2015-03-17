@@ -178,7 +178,6 @@ class LDA(AbstractFeature):
 
 
 class Fisherfaces(AbstractFeature):
-
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
         self._num_components = num_components

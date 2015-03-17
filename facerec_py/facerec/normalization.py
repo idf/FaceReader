@@ -49,7 +49,7 @@ def inverse_dissim(X):
 def gaussian_kernel(X, mu, sig):
     """
     gaussian kernel.
-    convert distance to similarity
+    convert distance to similarity by setting mu=0
     :param X:
     :param mu:
     :param sig:

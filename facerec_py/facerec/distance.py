@@ -19,7 +19,7 @@ class AbstractDistance(object):
 
 class EuclideanDistance(AbstractDistance):
     def __init__(self):
-        AbstractDistance.__init__(self,"EuclideanDistance")
+        AbstractDistance.__init__(self, "EuclideanDistance")
 
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
@@ -35,7 +35,7 @@ class CosineDistance(AbstractDistance):
             "Studies on sensitivity of face recognition performance to eye location accuracy.". Master Thesis (2004), Wang
     """
     def __init__(self):
-        AbstractDistance.__init__(self,"CosineDistance")
+        AbstractDistance.__init__(self, "CosineDistance")
 
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
@@ -51,7 +51,7 @@ class NormalizedCorrelation(AbstractDistance):
             "Multi-scale Local Binary Pattern Histogram for Face Recognition". PhD (2008). Chi Ho Chan, University Of Surrey.
     """
     def __init__(self):
-        AbstractDistance.__init__(self,"NormalizedCorrelation")
+        AbstractDistance.__init__(self, "NormalizedCorrelation")
     
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
@@ -61,7 +61,8 @@ class NormalizedCorrelation(AbstractDistance):
         pm = p - pmu
         qm = q - qmu
         return 1.0 - (np.dot(pm, qm) / (np.sqrt(np.dot(pm, pm)) * np.sqrt(np.dot(qm, qm))))
-        
+
+
 class ChiSquareDistance(AbstractDistance):
     """
         Negated Mahalanobis Cosine Distance.
@@ -70,7 +71,7 @@ class ChiSquareDistance(AbstractDistance):
             "Studies on sensitivity of face recognition performance to eye location accuracy.". Master Thesis (2004), Wang
     """
     def __init__(self):
-        AbstractDistance.__init__(self,"ChiSquareDistance")
+        AbstractDistance.__init__(self, "ChiSquareDistance")
 
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
@@ -80,13 +81,18 @@ class ChiSquareDistance(AbstractDistance):
 
 
 class HistogramIntersection(AbstractDistance):
+    """
+    Histogram Intersection is a similarity measure
+    Need to convert similarity to distance
+
+    """
     def __init__(self):
-        AbstractDistance.__init__(self,"HistogramIntersection")
+        AbstractDistance.__init__(self, "HistogramIntersection")
 
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
         q = np.asarray(q).flatten()
-        return np.sum(np.minimum(p,q))
+        return 1/(np.sum(np.minimum(p, q))+1)  # TODO better handling, normalization
 
 
 class BinRatioDistance(AbstractDistance):
@@ -97,7 +103,7 @@ class BinRatioDistance(AbstractDistance):
       "Use Bin-Ratio Information for Category and Scene Classification" (2010), Xie et.al. 
     """
     def __init__(self):
-        AbstractDistance.__init__(self,"BinRatioDistance")
+        AbstractDistance.__init__(self, "BinRatioDistance")
 
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
@@ -115,7 +121,7 @@ class L1BinRatioDistance(AbstractDistance):
       "Use Bin-Ratio Information for Category and Scene Classification" (2010), Xie et.al. 
     """
     def __init__(self):
-        AbstractDistance.__init__(self,"L1-BinRatioDistance")
+        AbstractDistance.__init__(self, "L1-BinRatioDistance")
     
     def __call__(self, p, q):
         p = np.asarray(p, dtype=np.float).flatten()
@@ -133,7 +139,7 @@ class ChiSquareBRD(AbstractDistance):
       "Use Bin-Ratio Information for Category and Scene Classification" (2010), Xie et.al. 
     """
     def __init__(self):
-        AbstractDistance.__init__(self,"ChiSquare-BinRatioDistance")
+        AbstractDistance.__init__(self, "ChiSquare-BinRatioDistance")
     
     def __call__(self, p, q):
         p = np.asarray(p, dtype=np.float).flatten()

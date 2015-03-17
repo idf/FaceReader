@@ -1,7 +1,7 @@
 import sys
 
 from facerec_py.facerec.feature import *
-from facerec_py.facerec.distance import EuclideanDistance
+from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
 from facerec_py.facerec.model import PredictableModel
 from facerec_py.facerec.validation import KFoldCrossValidation
@@ -33,8 +33,7 @@ class Experiment(object):
         # Close current figure
         pyplot.close()
 
-
-    def experiment(self, feature=Fisherfaces(), plot=None):
+    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance()):
         """
          Define the Fisherfaces as Feature Extraction method:
         :param feature:
@@ -52,7 +51,7 @@ class Experiment(object):
         # Now read in the image data. This must be a valid path!
         [X, y] = read_images(sys.argv[1])
         # Define a 1-NN classifier with Euclidean Distance:
-        classifier = NearestNeighbor(dist_metric=EuclideanDistance(), k=1)
+        classifier = NearestNeighbor(dist_metric=dist_metric, k=1)
         # Define the model as the combination
         model = PredictableModel(feature=feature, classifier=classifier)
         # Compute the Fisherfaces on the given data (in X) and labels (in y):
@@ -64,7 +63,7 @@ class Experiment(object):
         # Perform a 10-fold cross validation
         k = len(np.unique(y))
         if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=1)
+        cv = KFoldCrossValidation(model, k=k, threshold_up=0)
         cv.validate(X, y)
 
         # And print the result:
@@ -99,9 +98,9 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
     # expr.experiment(SpatialHistogram(), None)
     # expr.experiment(PCA(50), None)
-    # expr.experiment(GaborFilter(), None)
+    # expr.experiment(GaborFilterSki(), None)
     # expr.experiment(GaborFilterFisher(), None)
-    # expr.experiment(LGBPHS(), None)
+    expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())

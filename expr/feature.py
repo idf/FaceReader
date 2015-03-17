@@ -191,20 +191,20 @@ class LGBPHS(AbstractFeature):
         return self._model.extract(X)
 
     def __repr__(self):
-        return "LGBPHS"
+        return "LGBPHS(%s)" % (repr(self._model))
 
 
 class LGBPHS2(LGBPHS):
     def __init__(self):
         super(LGBPHS, self).__init__()
         # gabor = GaborFilterSki(freq_t=(0.15, ), theta_r=4)
-        gabor = GaborFilterCv2()
+        gabor = GaborFilterCv2(4, 2)
         lbp = ConcatenatedSpatialHistogram()
 
         self._model = ChainOperator(gabor, lbp)
 
     def __repr__(self):
-        return "LGBPHS2"
+        return "LGBPHS2(%s)"%(repr(self._model))
 
 
 class GaborFilterFisher(AbstractFeature):

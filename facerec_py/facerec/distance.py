@@ -1,5 +1,6 @@
 # Implements various distance metrics (because my old scipy.spatial.distance module is horrible)
 import numpy as np
+from facerec_py.facerec import normalization
 
 
 class AbstractDistance(object):
@@ -93,6 +94,20 @@ class HistogramIntersection(AbstractDistance):
         p = np.asarray(p).flatten()
         q = np.asarray(q).flatten()
         return 1/(np.sum(np.minimum(p, q))+1)  # TODO better handling, normalization
+
+
+class HistogramNormalizationIntersection(AbstractDistance):
+    def __init__(self):
+        super(self.__class__, self).__init__("HistogramNormalizationIntersection")
+        self.hist_int = HistogramIntersection()
+
+    def __call__(self, p, q):
+        p = np.asarray(p).flatten()
+        q = np.asarray(q).flatten()
+        p = normalization.vector_normalize(p)
+        q = normalization.vector_normalize(q)
+        return self.hist_int(p, q)
+
 
 
 class BinRatioDistance(AbstractDistance):

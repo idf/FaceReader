@@ -110,7 +110,6 @@ class GaborFilterCv2(AbstractFeature):
             for scale in range(self._scale_cnt):
                 ksize = int(k_max/2**scale+0.5)  # TODO
                 kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, 0, ktype=cv2.CV_32F)
-                kernel /= 1.5*kernel.sum()
                 self._kernels.append(kernel)
 
     def compute(self, X, y):
@@ -137,7 +136,7 @@ class GaborFilterCv2(AbstractFeature):
         return self.filter(X)
 
     def filter(self, x):
-        return self.simple_filter(x)
+        return self.fractalius_filter(x)
 
     def simple_filter(self, x):
         """
@@ -147,24 +146,31 @@ class GaborFilterCv2(AbstractFeature):
         """
         feats = np.zeros((len(self._kernels), x.shape[0], x.shape[1]), dtype=np.float32)
         for i, kernel in enumerate(self._kernels):
-            filtered = cv2.filter2D(x, cv2.CV_8UC3, kernel)
+            k = kernel.copy()
+            k /= k.sum()
+            filtered = cv2.filter2D(x, cv2.CV_8UC3, k)
             feats[i, :, :] = filtered
         return feats
 
     def fractalius_filter(self, x):
         """
         http://www.redfieldplugins.com/filterFractalius.htm
+
+        only need to get the largest
         :param x: a single test data
         :return: features
         """
-        feats = np.zeros((len(self._kernels), x.shape[0], x.shape[1]), dtype=np.float32)
+        feats = np.zeros((1, x.shape[0], x.shape[1]), dtype=np.float32)
+
         accum = np.zeros_like(x)
         for i, kernel in enumerate(self._kernels):
-            filtered = cv2.filter2D(x, cv2.CV_8UC3, kernel)
+            k = kernel.copy()
+            k /= 1.5*k.sum()
+            filtered = cv2.filter2D(x, cv2.CV_8UC3, k)
             np.maximum(accum, filtered, accum)
-            feats[i, :, :] = accum  # TODO
-        return feats
 
+        feats[0, :, :] = accum
+        return feats
 
     def __repr__(self):
         return "GaborFilterCv2 (orient_count=%s, scale_count=%s)" % (str(self._orient_cnt), str(self._scale_cnt))

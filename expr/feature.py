@@ -103,11 +103,13 @@ class GaborFilterCv2(AbstractFeature):
     def build_filters(self):
         self._kernels = []
         k_max = 199
-        lambd = 10.0
+        lambd = 10.0  # 10.0
+        sigma = 4.0  # 4.0
+        gamma = 0.5
         for theta in np.arange(0, np.pi, np.pi/self._orient_cnt):
             for scale in range(self._scale_cnt):
                 ksize = int(k_max/2**scale+0.5)  # TODO
-                kernel = cv2.getGaborKernel((ksize, ksize), 4.0, theta, lambd, 0.5, 0, ktype=cv2.CV_32F)
+                kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, 0, ktype=cv2.CV_32F)
                 kernel /= 1.5*kernel.sum()
                 self._kernels.append(kernel)
 
@@ -135,13 +137,34 @@ class GaborFilterCv2(AbstractFeature):
         return self.filter(X)
 
     def filter(self, x):
+        return self.simple_filter(x)
+
+    def simple_filter(self, x):
+        """
+        Simple Gabor Convolve
+        :param x: a single test data
+        :return:
+        """
+        feats = np.zeros((len(self._kernels), x.shape[0], x.shape[1]), dtype=np.float32)
+        for i, kernel in enumerate(self._kernels):
+            filtered = cv2.filter2D(x, cv2.CV_8UC3, kernel)
+            feats[i, :, :] = filtered
+        return feats
+
+    def fractalius_filter(self, x):
+        """
+        http://www.redfieldplugins.com/filterFractalius.htm
+        :param x: a single test data
+        :return: features
+        """
         feats = np.zeros((len(self._kernels), x.shape[0], x.shape[1]), dtype=np.float32)
         accum = np.zeros_like(x)
-        for i, v in enumerate(self._kernels):
-            filtered = cv2.filter2D(x, cv2.CV_8UC3, v)
+        for i, kernel in enumerate(self._kernels):
+            filtered = cv2.filter2D(x, cv2.CV_8UC3, kernel)
             np.maximum(accum, filtered, accum)
-            feats[i, :, :] = accum
+            feats[i, :, :] = accum  # TODO
         return feats
+
 
     def __repr__(self):
         return "GaborFilterCv2 (orient_count=%s, scale_count=%s)" % (str(self._orient_cnt), str(self._scale_cnt))

@@ -98,9 +98,9 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
     # expr.experiment(SpatialHistogram())
     # expr.experiment(PCA(50))
     # expr.experiment(GaborFilterSki())
     # expr.experiment(GaborFilterFisher())
-    # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
+    expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())

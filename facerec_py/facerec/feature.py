@@ -51,6 +51,14 @@ class PCA(AbstractFeature):
         PCA over the entire images set
         dimension reduction for entire images set
 
+
+        * Prepare the data with each column representing an image.
+        * Subtract the mean image from the data.
+        * Calculate the eigenvectors and eigenvalues of the covariance matrix.
+        * Find the optimal transformation matrix by selecting the principal components (eigenvectors with largest eigenvalues).
+        * Project the centered data into the subspace.
+        Reference: http://en.wikipedia.org/wiki/Eigenface#Practical_implementation
+
         :param X: The images, which is a Python list of numpy arrays.
         :param y: The corresponding labels (the unique number of the subject, person) in a Python list.
         :return:
@@ -68,7 +76,6 @@ class PCA(AbstractFeature):
         XC = XC - self._mean
 
         # perform an economy size decomposition (may still allocate too much memory for computation)
-        # where is the covariance?
         self._eigenvectors, self._eigenvalues, variances = np.linalg.svd(XC, full_matrices=False)
 
         # sort eigenvectors by eigenvalues in descending order
@@ -76,8 +83,8 @@ class PCA(AbstractFeature):
         self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:,idx]
 
         # use only num_components
-        self._eigenvectors = self._eigenvectors[0:,0:self._num_components].copy()
-        self._eigenvalues = self._eigenvalues[0:self._num_components].copy()
+        self._eigenvectors = self._eigenvectors[:, :self._num_components].copy()
+        self._eigenvalues = self._eigenvalues[:self._num_components].copy()
 
         # finally turn singular values into eigenvalues 
         self._eigenvalues = np.power(self._eigenvalues,2) / XC.shape[1]
@@ -97,7 +104,7 @@ class PCA(AbstractFeature):
         return np.dot(self._eigenvectors.T, X)
 
     def reconstruct(self, X):
-        X = np.dot(self._eigenvectors, X)
+        X = np.dot(self._eigenvectors, X)  # unitary mat
         return X + self._mean
 
     @property

@@ -63,7 +63,7 @@ class Experiment(object):
         # Perform a 10-fold cross validation
         k = len(np.unique(y))
         if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=0)
+        cv = KFoldCrossValidation(model, k=k, threshold_up=1)
         cv.validate(X, y)
 
         # And print the result:
@@ -71,36 +71,24 @@ class Experiment(object):
         return cv
 
     def plot_roc(self, cv):
-        # Convert to string
-        temp_result = repr(cv)
         # Extract FPR
-        raw_fpr = re.findall(r'FPR=\d+\.\d+%', temp_result)
-        string_fpr = repr(raw_fpr)
-        temp_fpr = re.findall(r'\d+\.\d+', string_fpr)
-        fpr = map(float, temp_fpr)
-        myDividend = 100.00
-        true_fpr = [x / myDividend for x in fpr]
-        # Extract TPR
-        raw_tpr = re.findall(r'TPR=\d+\.\d+%', temp_result)
-        string_tpr = repr(raw_tpr)
-        temp_tpr = re.findall(r'\d+\.\d+', string_tpr)
-        tpr = map(float, temp_tpr)
-        true_tpr = [x / myDividend for x in tpr]
-        print true_fpr
-        print true_tpr
+        FPRs = [r.FPR for r in cv.validation_results]
+        TPRs = [r.TPR for r in cv.validation_results]
+
         # Plot ROC
         pyplot.figure(2)
         # pyplot.axis([-0.01, 1.0, 0.95, 1.01])
         # ax = pyplot.gca()
         # ax.set_autoscale_on(False)
-        pyplot.plot(true_fpr, true_tpr, 'g')
+        pyplot.plot(FPRs, TPRs, 'g')
         pyplot.show()
 
 if __name__ == "__main__":
     expr = Experiment()
-    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    cv = expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    expr.plot_roc(cv)
     # expr.experiment(SpatialHistogram())
     # expr.experiment(PCA(50))
     # expr.experiment(GaborFilterSki())
     # expr.experiment(GaborFilterFisher())
-    expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
+    # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())

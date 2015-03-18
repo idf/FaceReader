@@ -77,7 +77,7 @@ class Experiment(object):
 
         # Plot ROC
         pyplot.figure(2)
-        # pyplot.axis([-0.01, 1.0, 0.95, 1.01])
+        pyplot.axis([0, 0.5, 0.8, 1.001])
         # ax = pyplot.gca()
         # ax.set_autoscale_on(False)
         pyplot.plot(FPRs, TPRs, 'g')

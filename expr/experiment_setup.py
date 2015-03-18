@@ -23,6 +23,7 @@ class Drawer(object):
         # ax.set_autoscale_on(False)
         plt.xlabel('FPR')
         plt.ylabel('TPR')
+        plt.rc('axes', color_cycle=['r', 'g', 'b', 'c', 'm', 'y', 'k'])
 
         self._rocs = []
 
@@ -41,7 +42,7 @@ class Drawer(object):
         TPRs = [r.TPR for r in cv.validation_results]
 
         # Plot ROC
-        roc, = plt.plot(FPRs, TPRs, 'g', label=cv.model.feature.short_name())
+        roc, = plt.plot(FPRs, TPRs, label=cv.model.feature.short_name())
         self._rocs.append(roc)
 
 
@@ -111,7 +112,6 @@ class Experiment(object):
         :param cv:
         :return:
         """
-        # TODO different color
         self._drawer.plot_roc(cv)
 
 

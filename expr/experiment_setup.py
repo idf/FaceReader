@@ -1,6 +1,5 @@
 import sys
 
-from facerec_py.facerec.feature import *
 from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
 from facerec_py.facerec.model import PredictableModel
@@ -8,19 +7,48 @@ from facerec_py.facerec.validation import KFoldCrossValidation
 from facerec_py.facerec.visual import subplot
 from facerec_py.facerec.util import minmax_normalize
 from expr.read_dataset import read_images
-import numpy as np
 import matplotlib.cm as cm
-import matplotlib.pyplot as pyplot
-import re
+import matplotlib.pyplot as plt
 from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
 
 __author__ = 'Danyang'
 
 
+class Drawer(object):
+    def __init__(self):
+        plt.figure("ROC")
+        plt.axis([0, 0.5, 0.5, 1.001])
+        # ax = pyplot.gca()
+        # ax.set_autoscale_on(False)
+        plt.xlabel('FPR')
+        plt.ylabel('TPR')
+
+        self._rocs = []
+
+    def show(self):
+        plt.legend(handles=self._rocs)
+        plt.show()
+
+    def plot_roc(self, cv):
+        """
+        :type cv: KFoldCrossValidation
+        :param cv:
+        :return:
+        """
+        # Extract FPR
+        FPRs = [r.FPR for r in cv.validation_results]
+        TPRs = [r.TPR for r in cv.validation_results]
+
+        # Plot ROC
+        roc, = plt.plot(FPRs, TPRs, 'g', label=cv.model.feature.short_name())
+        self._rocs.append(roc)
+
+
 class Experiment(object):
     def __init__(self):
         self.logger = LoggerFactory().getConsoleLogger("facerec")
+        self._drawer = Drawer()
 
     def plot_fisher(self, X, model):
         E = []
@@ -31,7 +59,7 @@ class Experiment(object):
         subplot(title="Fisherfaces", images=E, rows=4, cols=4, sptitle="Fisherface", colormap=cm.jet,
                 filename="fisherfaces.png")
         # Close current figure
-        pyplot.close()
+        plt.close()
 
     def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance()):
         """
@@ -70,25 +98,31 @@ class Experiment(object):
         print cv
         return cv
 
-    def plot_roc(self, cv):
-        # Extract FPR
-        FPRs = [r.FPR for r in cv.validation_results]
-        TPRs = [r.TPR for r in cv.validation_results]
+    def show_plot(self):
+        """
+        Plot the graph at the end
+        :return:
+        """
+        self._drawer.show()
 
-        # Plot ROC
-        pyplot.figure(2)
-        pyplot.axis([0, 0.5, 0.8, 1.001])
-        # ax = pyplot.gca()
-        # ax.set_autoscale_on(False)
-        pyplot.plot(FPRs, TPRs, 'g')
-        pyplot.show()
+    def plot_roc(self, cv):
+        """
+        Plot a individual result
+        :param cv:
+        :return:
+        """
+        # TODO different color
+        self._drawer.plot_roc(cv)
+
 
 if __name__ == "__main__":
     expr = Experiment()
-    cv = expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    cv = expr.experiment(Fisherfaces(14))
     expr.plot_roc(cv)
+    # cv = expr.experiment(PCA(50))
+    # expr.plot_roc(cv)
+    expr.show_plot()
     # expr.experiment(SpatialHistogram())
-    # expr.experiment(PCA(50))
     # expr.experiment(GaborFilterSki())
     # expr.experiment(GaborFilterFisher())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())

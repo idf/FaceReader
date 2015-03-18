@@ -87,6 +87,9 @@ class GaborFilterSki(AbstractFeature):
     def __repr__(self):
         return "GaborFilterSki (freq=%s, theta=%s)" % (str(self._freq_t), str(self._theta_r))
 
+    def short_name(self):
+        return "GaborFilter"
+
 
 class GaborFilterCv2(AbstractFeature):
     """
@@ -177,6 +180,9 @@ class GaborFilterCv2(AbstractFeature):
     def __repr__(self):
         return "GaborFilterCv2 (orient_count=%s, scale_count=%s)" % (str(self._orient_cnt), str(self._scale_cnt))
 
+    def short_name(self):
+        return "GaborFilter"
+
 
 class MultiScaleSpatialHistogram(SpatialHistogram):
     def __init__(self, lbp_operator=ExtendedLBP(), sz=(8, 8)):
@@ -224,6 +230,9 @@ class LGBPHS(AbstractFeature):
     def __repr__(self):
         return "LGBPHS(%s)" % (repr(self._model))
 
+    def short_name(self):
+        return "LGBPHS"
+
 
 class LGBPHS2(LGBPHS):
     def __init__(self):
@@ -236,6 +245,9 @@ class LGBPHS2(LGBPHS):
 
     def __repr__(self):
         return "LGBPHS2(%s)"%(repr(self._model))
+
+    def short_name(self):
+        return "LGBPHS"
 
 
 class GaborFilterFisher(AbstractFeature):
@@ -255,4 +267,7 @@ class GaborFilterFisher(AbstractFeature):
 
     def __repr__(self):
         return "GaborFilterFisher"
+
+    def short_name(self):
+        return "GaborFisher"
 

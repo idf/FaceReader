@@ -18,6 +18,9 @@ class AbstractFeature(object):
     def __repr__(self):
         return "AbstractFeature"
 
+    def short_name(self):
+        return "AbstractFeature"
+
 
 class Identity(AbstractFeature):
     """
@@ -126,6 +129,9 @@ class PCA(AbstractFeature):
     def __repr__(self):
         return "PCA (num_components=%d)" % (self._num_components)
 
+    def short_name(self):
+        return "PCA"
+
 
 class LDA(AbstractFeature):
     def __init__(self, num_components=0):
@@ -190,6 +196,8 @@ class LDA(AbstractFeature):
     def __repr__(self):
         return "LDA (num_components=%d)" % (self._num_components)
 
+    def short_name(self):
+        return "LDA"
 
 class Fisherfaces(AbstractFeature):
     def __init__(self, num_components=0):
@@ -245,7 +253,10 @@ class Fisherfaces(AbstractFeature):
         return self._eigenvectors
 
     def __repr__(self):
-        return "Fisherfaces (num_components=%s)" % (self.num_components)
+        return "Fisherfaces (num_components=%s)" % self.num_components
+
+    def short_name(self):
+        return "Fisher"
 
 from facerec_py.facerec.lbp import LocalDescriptor, ExtendedLBP
 
@@ -296,4 +307,7 @@ class SpatialHistogram(AbstractFeature):
         return np.asarray(E)
 
     def __repr__(self):
-        return "SpatialHistogram (operator=%s, grid=%s)" % (repr(self.lbp_operator), str(self.sz))
+        return "SpatialHistogram LBP (operator=%s, grid=%s)" % (repr(self.lbp_operator), str(self.sz))
+
+    def short_name(self):
+        return "LBP"

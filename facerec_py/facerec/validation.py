@@ -282,7 +282,7 @@ class KFoldCrossValidation(ValidationStrategy):
         if self.threshold_up==0:
             threshold_r = [0]
         else:
-            threshold_r = frange(0, self.threshold_up, 0.01)
+            threshold_r = frange(0, self.threshold_up, 0.001)
 
         rates = {}
         for threshold in threshold_r:

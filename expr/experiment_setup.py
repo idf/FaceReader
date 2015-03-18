@@ -11,12 +11,13 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
-
+from scipy.interpolate import spline
+import numpy as np
 __author__ = 'Danyang'
 
 
 class Drawer(object):
-    def __init__(self):
+    def __init__(self, smooth=False):
         plt.figure("ROC")
         plt.axis([0, 0.5, 0.5, 1.001])
         # ax = pyplot.gca()
@@ -24,7 +25,7 @@ class Drawer(object):
         plt.xlabel('FPR')
         plt.ylabel('TPR')
         plt.rc('axes', color_cycle=['r', 'g', 'b', 'c', 'm', 'y', 'k'])
-
+        self.is_smooth = smooth
         self._rocs = []
 
     def show(self):
@@ -40,10 +41,22 @@ class Drawer(object):
         # Extract FPR
         FPRs = [r.FPR for r in cv.validation_results]
         TPRs = [r.TPR for r in cv.validation_results]
+        if self.is_smooth:
+            FPRs, TPRs = self.smooth(FPRs, TPRs)
 
         # Plot ROC
         roc, = plt.plot(FPRs, TPRs, label=cv.model.feature.short_name())
         self._rocs.append(roc)
+
+    def smooth(self, x, y):
+        x = np.array(x)
+        y = np.array(y)
+        x, idx = np.unique(x, return_index=True)  # otherwise singular matrix
+        y = y[idx]
+
+        x_sm = np.linspace(x.min(), x.max(), 60)  # evenly spaced numbers over a specified interval.
+        y_sm = spline(x, y, x_sm)
+        return x_sm, y_sm
 
 
 class Experiment(object):

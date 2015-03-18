@@ -58,20 +58,27 @@ class PCA(AbstractFeature):
         # build the column matrix
         XC = asColumnMatrix(X)
         y = np.asarray(y)
+
         # set a valid number of components
         if self._num_components <= 0 or (self._num_components > XC.shape[1]-1):
             self._num_components = XC.shape[1]-1  # one less dimension
+
         # center dataset
         self._mean = XC.mean(axis=1).reshape(-1,1)
         XC = XC - self._mean
+
         # perform an economy size decomposition (may still allocate too much memory for computation)
+        # where is the covariance?
         self._eigenvectors, self._eigenvalues, variances = np.linalg.svd(XC, full_matrices=False)
+
         # sort eigenvectors by eigenvalues in descending order
         idx = np.argsort(-self._eigenvalues)
         self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:,idx]
+
         # use only num_components
         self._eigenvectors = self._eigenvectors[0:,0:self._num_components].copy()
         self._eigenvalues = self._eigenvalues[0:self._num_components].copy()
+
         # finally turn singular values into eigenvalues 
         self._eigenvalues = np.power(self._eigenvalues,2) / XC.shape[1]
         # get the features from the given data

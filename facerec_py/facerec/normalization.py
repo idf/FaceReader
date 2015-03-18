@@ -17,6 +17,14 @@ def minmax(X, low, high, minX=None, maxX=None, dtype=np.float):
 
 
 def zscore(X, mean=None, std=None):
+    """
+    Mean Normalization + Feature Scaling
+
+    :param X: ndarray
+    :param mean: mean
+    :param std: std dev
+    :return: normalized ndarry
+    """
     X = np.asarray(X)
     if mean is None:
         mean = X.mean()

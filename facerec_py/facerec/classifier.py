@@ -1,5 +1,5 @@
 from facerec_py.facerec.distance import EuclideanDistance
-from facerec_py.facerec.normalization import gaussian_dissim, inverse_dissim
+from facerec_py.facerec.normalization import gaussian_kernel, inverse_dissim
 from facerec_py.facerec.util import asRowMatrix
 import logging
 import numpy as np
@@ -91,17 +91,15 @@ class NearestNeighbor(AbstractClassifier):
         # Sort the labels and distances accordingly:
         sorted_y = self.y[idx]
         sorted_distances = distances[idx]
-        # sorted_sim = gaussian_dissim(sorted_distances, sorted_distances.std())
         sorted_sim = inverse_dissim(sorted_distances)
         # Take only the k first items:
         # sorted_y = sorted_y[:self.k]
         # sorted_distances = sorted_distances[:self.k]
         # sorted_sim = sorted_sim[:self.k]
-        # Make a histogram of them:
-        hist = dict((key, val) for key, val in enumerate(np.bincount(sorted_y)) if val)
-        # And get the bin with the maximum frequency:
-        predicted_label = max(hist.iteritems(), key=op.itemgetter(1))[0]
 
+        # Make a histogram of them, and get the bin with the maximum frequency:
+        hist = dict((key, val) for key, val in enumerate(np.bincount(sorted_y[:self.k])) if val)
+        predicted_label = max(hist.iteritems(), key=op.itemgetter(1))[0]
 
         # A classifier should output a list with the label as first item and
         # generic data behind. The k-nearest neighbor classifier outputs the 

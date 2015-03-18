@@ -46,7 +46,15 @@ def inverse_dissim(X):
     return 1./(1+X)
 
 
-def gaussian_dissim(X, sig):
+def gaussian_kernel(X, mu, sig):
+    """
+    gaussian kernel.
+    convert distance to similarity by setting mu=0
+    :param X:
+    :param mu:
+    :param sig:
+    :return:
+    """
     X = np.asarray(X)
     X = X.copy()
-    return np.exp(-X**2/(2*sig**2))
+    return np.exp(-np.sum(np.power(X-mu, 2))/(2*sig**2))

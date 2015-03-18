@@ -178,7 +178,6 @@ class LDA(AbstractFeature):
 
 
 class Fisherfaces(AbstractFeature):
-
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
         self._num_components = num_components
@@ -238,7 +237,15 @@ from facerec_py.facerec.lbp import LocalDescriptor, ExtendedLBP
 
 
 class SpatialHistogram(AbstractFeature):
-    def __init__(self, lbp_operator=ExtendedLBP(), sz = (8,8)):
+    def __init__(self, lbp_operator=ExtendedLBP(), sz=(8, 8)):
+        """
+        Instead of doing one histogram for the whole picture, slice the image into mxn (sz) smaller patches, and make a
+        histogram for that patch only. And append those small histograms to a single one to form the spatial histogram
+
+        :param lbp_operator:
+        :param sz: rows * cols for non-overlapping sub-regions of a picture
+        :return:
+        """
         AbstractFeature.__init__(self)
         if not isinstance(lbp_operator, LocalDescriptor):
             raise TypeError("Only an operator of type facerec.lbp.LocalDescriptor is a valid lbp_operator.")
@@ -248,7 +255,7 @@ class SpatialHistogram(AbstractFeature):
     def compute(self,X,y):
         features = []
         for x in X:
-            x = np.asarray(x)
+            x = np.asarray(x)  # x is the image, height * width
             h = self.spatially_enhanced_histogram(x)
             features.append(h)
         return features
@@ -259,7 +266,7 @@ class SpatialHistogram(AbstractFeature):
 
     def spatially_enhanced_histogram(self, X):
         # calculate the LBP image
-        L = self.lbp_operator(X)
+        L = self.lbp_operator(X)  # height * width
         # calculate the grid geometry
         lbp_height, lbp_width = L.shape
         grid_rows, grid_cols = self.sz

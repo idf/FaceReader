@@ -1,9 +1,11 @@
-__author__ = 'Danyang'
 import sys
 import os
 
 import numpy as np
 from PIL import Image
+import re
+
+__author__ = 'Danyang'
 
 
 def read_images(path, sz=None):
@@ -26,6 +28,10 @@ def read_images(path, sz=None):
             subject_path = os.path.join(dirname, subdirname)
             for filename in os.listdir(subject_path):
                 try:
+                    if not re.search(r"\.pgm$|\.jpg$", filename):
+                        continue
+                    if re.search(r"P00_Ambient\.pgm", filename):  # Yale B, wrong dimension
+                        continue
                     im = Image.open(os.path.join(subject_path, filename))
                     im = im.convert("L")
                     # resize to given size (if given)

@@ -11,10 +11,10 @@ from util.commons_util.fundamentals.generators import frange
 
 # TODO The evaluation of a model should be completely moved to the generic ValidationStrategy. The specific Validation 
 # implementations should only care about partition the data, which would make a lot sense. Currently it is not
-#       possible to calculate the true_negatives and false_negatives with the way the predicitions are generated and 
+#       possible to calculate the true_negatives and false_negatives with the way the predicitions are generated and
 #       data is prepared.
-#       
-#     The mentioned problem makes a change in the PredictionResult necessary, which basically means refactoring the 
+#
+#     The mentioned problem makes a change in the PredictionResult necessary, which basically means refactoring the
 #       entire framework. The refactoring is planned, but I can't give any details as time of writing.
 #
 #     Please be careful, when referring to the Performance Metrics at the moment, only the Precision is implemented,
@@ -215,14 +215,14 @@ class ValidationStrategy(object):
         """
         raise NotImplementedError("Every Validation module must implement the validate method!")
 
-
     def print_results(self):
         print self.model
         for validation_result in self.validation_results:
             print validation_result
 
     def __repr__(self):
-        return "Validation Kernel (model=%s)" % (self.model)
+        return "Validation Kernel (model=%s)" % self.model
+
 
 class KFoldCrossValidation(ValidationStrategy):
     """ 
@@ -417,14 +417,14 @@ class LeaveOneOutCrossValidation(ValidationStrategy):
             # get prediction
             prediction = self.model.predict(X[i])[0]
             if prediction == y[i]:
-                true_positives = true_positives + 1
+                true_positives += 1
             else:
-                false_positives = false_positives + 1
+                false_positives += 1
 
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 
     def __repr__(self):
-        return "Leave-One-Out Cross Validation (model=%s)" % (self.model)
+        return "Leave-One-Out Cross Validation (model=%s)" % self.model
 
 
 class LeaveOneClassOutCrossValidation(ValidationStrategy):
@@ -471,13 +471,13 @@ class LeaveOneClassOutCrossValidation(ValidationStrategy):
                 # get prediction
                 prediction = self.model.predict(X[j])[0]
                 if prediction == g[j]:
-                    true_positives = true_positives + 1
+                    true_positives += 1
                 else:
-                    false_positives = false_positives + 1
+                    false_positives += 1
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 
     def __repr__(self):
-        return "Leave-One-Class-Out Cross Validation (model=%s)" % (self.model)
+        return "Leave-One-Class-Out Cross Validation (model=%s)" % self.model
 
 
 class SimpleValidation(ValidationStrategy):
@@ -513,11 +513,11 @@ class SimpleValidation(ValidationStrategy):
             self.logger.debug("Predicting %s/%s." % (count, len(ytest)))
             prediction = self.model.predict(Xtest[i])[0]
             if prediction == ytest[i]:
-                true_positives = true_positives + 1
+                true_positives += 1
             else:
-                false_positives = false_positives + 1
-            count = count + 1
+                false_positives += 1
+            count += 1
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 
     def __repr__(self):
-        return "Simple Validation (model=%s)" % (self.model)
+        return "Simple Validation (model=%s)" % self.model

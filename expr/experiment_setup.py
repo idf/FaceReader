@@ -1,4 +1,7 @@
 import sys
+sys.path.append('/Users/Xingjia/Development/FaceReader')
+sys.path.append('/Users/Xingjia/Development/libsvm-3.20/python')
+sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python')
 
 from facerec_py.facerec.feature import *
 from facerec_py.facerec.distance import *
@@ -8,15 +11,14 @@ from facerec_py.facerec.validation import KFoldCrossValidation
 from facerec_py.facerec.visual import subplot
 from facerec_py.facerec.util import minmax_normalize
 from expr.read_dataset import read_images
+from nda import NDAFisher, NDA
 import numpy as np
 import matplotlib.cm as cm
 import matplotlib.pyplot as pyplot
 import re
 from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
-
 __author__ = 'Danyang'
-
 
 class Experiment(object):
     def __init__(self):
@@ -98,7 +100,8 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    # expr.experiment(Fisherfaces(14), expr.plot_fisher)
+    expr.experiment(NDAFisher(), expr.plot_roc)
     # expr.experiment(SpatialHistogram())
     # expr.experiment(PCA(50))
     # expr.experiment(GaborFilterSki())

@@ -21,3 +21,5 @@ To disable ROC: `cv = KFoldCrossValidation(model, k=10, threshold_up=0)`
 ## Databases
 ### Yale A 
 ![](/img/yale_a.png)
+Basic Algorithms  
+![](/img/basics.png)

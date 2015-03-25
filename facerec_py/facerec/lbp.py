@@ -15,14 +15,17 @@ class LocalDescriptor(object):
         return self._neighbors
 
     def __repr__(self):
-        return "LBPOperator (neighbors=%s)" % (self._neighbors)
+        return "LBPOperator (neighbors=%s)" % self._neighbors
 
 
 class OriginalLBP(LocalDescriptor):
     def __init__(self):
-        LocalDescriptor.__init__(self, neighbors=8)
+        """
+        only 8 neighbors
+        """
+        LocalDescriptor.__init__(self, 8)
 
-    def __call__(self,X):
+    def __call__(self, X):
         X = np.asarray(X)
         X = (1<<7) * (X[0:-2,0:-2] >= X[1:-1,1:-1]) \
             + (1<<6) * (X[0:-2,1:-1] >= X[1:-1,1:-1]) \
@@ -35,12 +38,12 @@ class OriginalLBP(LocalDescriptor):
         return X
 
     def __repr__(self):
-        return "OriginalLBP (neighbors=%s)" % (self._neighbors)
+        return "OriginalLBP (neighbors=%s)" % self._neighbors
 
 
 class ExtendedLBP(LocalDescriptor):
     def __init__(self, radius=1, neighbors=8):
-        LocalDescriptor.__init__(self, neighbors=neighbors)
+        LocalDescriptor.__init__(self, neighbors)
         self._radius = radius
 
     def __call__(self,X):
@@ -105,7 +108,7 @@ class ExtendedLBP(LocalDescriptor):
 
 class VarLBP(LocalDescriptor):
     def __init__(self, radius=1, neighbors=8):
-        LocalDescriptor.__init__(self, neighbors=neighbors)
+        LocalDescriptor.__init__(self, neighbors)
         self._radius = radius
 
     def __call__(self,X):
@@ -191,7 +194,7 @@ class LPQ(LocalDescriptor):
     """
 
     def __init__(self, radius=3):
-        LocalDescriptor.__init__(self, neighbors=8)
+        LocalDescriptor.__init__(self, 8)
         self._radius = radius
 
     def euc_dist(self, X):

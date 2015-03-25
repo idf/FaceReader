@@ -258,7 +258,7 @@ class Fisherfaces(AbstractFeature):
     def short_name(self):
         return "Fisher"
 
-from facerec_py.facerec.lbp import LocalDescriptor, ExtendedLBP
+from facerec_py.facerec.lbp import *
 
 
 class SpatialHistogram(AbstractFeature):

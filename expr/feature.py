@@ -5,6 +5,7 @@ from skimage.filters import gabor_kernel  # from skimage.filter._gabor import ga
 from facerec_py.facerec import normalization
 from facerec_py.facerec.feature import *
 import cv2
+from facerec_py.facerec.lbp import *
 from util.commons_util.decorators.algorithms import memoize, memoize_force
 
 __author__ = 'Danyang'
@@ -197,7 +198,7 @@ class MultiScaleSpatialHistogram(SpatialHistogram):
 
 
 class ConcatenatedSpatialHistogram(SpatialHistogram):
-    def __init__(self, lbp_operator=ExtendedLBP(), sz=(8, 8)):
+    def __init__(self, lbp_operator=LPQ(radius=4), sz=(8, 8)):
         super(ConcatenatedSpatialHistogram, self).__init__(lbp_operator, sz)
 
     def spatially_enhanced_histogram(self, X):

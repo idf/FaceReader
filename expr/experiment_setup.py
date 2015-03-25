@@ -75,7 +75,7 @@ class Experiment(object):
         # Close current figure
         plt.close()
 
-    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance()):
+    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0):
         """
          Define the Fisherfaces as Feature Extraction method:
         :param feature:
@@ -105,7 +105,7 @@ class Experiment(object):
         # Perform a 10-fold cross validation
         k = len(np.unique(y))
         if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=0)
+        cv = KFoldCrossValidation(model, k=k, threshold_up=threshold_up)
         cv.validate(X, y)
 
         # And print the result:
@@ -131,14 +131,22 @@ class Experiment(object):
         self._drawer.plot_roc(cv)
 
 
+def draw_roc(expr):
+    """
+    set threshold_up=1
+    :param expr:
+    :return:
+    """
+    cv = expr.experiment(Fisherfaces(14), threshold_up=1)
+    expr.plot_roc(cv)
+    cv = expr.experiment(PCA(50), threshold_up=1)
+    expr.plot_roc(cv)
+    cv = expr.experiment(SpatialHistogram(), dist_metric=HistogramIntersection(), threshold_up=1)
+    expr.plot_roc(cv)
+
+    expr.show_plot()
+
 if __name__ == "__main__":
     expr = Experiment()
-    # cv = expr.experiment(Fisherfaces(14))
-    # expr.plot_roc(cv)
-    # cv = expr.experiment(PCA(50))
-    # expr.plot_roc(cv)
-    # expr.show_plot()
-    # expr.experiment(SpatialHistogram())
-    # expr.experiment(GaborFilterSki())
-    # expr.experiment(GaborFilterFisher())
-    expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
+    draw_roc(expr)
+    # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())

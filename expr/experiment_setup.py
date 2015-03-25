@@ -110,6 +110,9 @@ class Experiment(object):
 
         # And print the result:
         print cv
+        self.logger.info("Cross validation completed; press any key on any image to continue")
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
         return cv
 
     def show_plot(self):

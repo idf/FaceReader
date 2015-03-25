@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import math as math
 import random as random
 import logging
+import cv2
 
 import numpy as np
 
@@ -253,12 +254,12 @@ class KFoldCrossValidation(ValidationStrategy):
         self.logger = logging.getLogger("facerec.validation.KFoldCrossValidation")
 
     def validate(self, X, y, description="ExperimentName"):
-        """ Performs a k-fold cross validation
-        
-        Args:
-
-            X [dim x num_data] input data to validate on
-            y [1 x num_data] classes
+        """
+        X, y are original data
+        :param X: X [dim x num_data] input data to validate on
+        :param y: y [1 x num_data] classes
+        :param description:
+        :return:
         """
         X, y = shuffle(X, y)
         c = len(np.unique(y))
@@ -310,16 +311,16 @@ class KFoldCrossValidation(ValidationStrategy):
                 predictions[j] = self.model.predict(X[j])
 
             if self.threshold_up == 0:  # simple evaluation
-                rates[threshold] += self.simple_evaluate(testIdx, predictions, y)
+                rates[threshold] += self.simple_evaluate(testIdx, predictions, X, y)
             else:  # binary evaluation
                 for threshold in threshold_r:
-                    rates[threshold] += self.binary_evaluate(testIdx, predictions, y, threshold)
+                    rates[threshold] += self.binary_evaluate(testIdx, predictions, X, y, threshold)
 
         for threshold in threshold_r:
             r = rates[threshold]
             self.add(ValidationResult(r.TP, r.TN, r.FP, r.FN, threshold))
 
-    def simple_evaluate(self, testIdX, predictions, y):
+    def simple_evaluate(self, testIdX, predictions, X, y):
         r = TFPN()
         for j in testIdX:
             prediction, info = predictions[j]
@@ -327,9 +328,23 @@ class KFoldCrossValidation(ValidationStrategy):
                 r.TP += 1
             else:
                 r.FP += 1
+                self.display_prediction_error(X[j], y[j], prediction)
         return r
 
-    def binary_evaluate(self, testIdX, predictions, y, threshold):
+    def display_prediction_error(self, data, actual, predicted):
+        """
+        display the gray scale image
+        :param data: matrix
+        :param actual: actual label
+        :param predicted: predicted label
+        :return:
+        """
+        error_msg = "%d!=%d" % (actual, predicted)
+        self.logger.debug("prediction error, actual!=predicted: " + error_msg)
+        cv2.imshow(error_msg, data)
+        cv2.waitKey(1)
+
+    def binary_evaluate(self, testIdX, predictions, X, y, threshold):
         """
         Binary classification thresholding strategy
         :param testIdX:

@@ -36,8 +36,7 @@ def read_images(path, sz=None):
                     im = im.convert("L")
                     # resize to given size (if given)
                     if sz is not None:
-                        orl_sz = (92, 112)
-                        im = im.resize(orl_sz, Image.ANTIALIAS)
+                        im = im.resize(sz, Image.ANTIALIAS)
                     X.append(np.asarray(im, dtype=np.uint8))
                     y.append(c)
                 except IOError, (errno, strerror):

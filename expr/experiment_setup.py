@@ -105,7 +105,7 @@ class Experiment(object):
         # Perform a 10-fold cross validation
         k = len(np.unique(y))
         if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=1)
+        cv = KFoldCrossValidation(model, k=k, threshold_up=0)
         cv.validate(X, y)
 
         # And print the result:
@@ -133,12 +133,12 @@ class Experiment(object):
 
 if __name__ == "__main__":
     expr = Experiment()
-    cv = expr.experiment(Fisherfaces(14))
-    expr.plot_roc(cv)
+    # cv = expr.experiment(Fisherfaces(14))
+    # expr.plot_roc(cv)
     # cv = expr.experiment(PCA(50))
     # expr.plot_roc(cv)
-    expr.show_plot()
+    # expr.show_plot()
     # expr.experiment(SpatialHistogram())
     # expr.experiment(GaborFilterSki())
     # expr.experiment(GaborFilterFisher())
-    # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
+    expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())

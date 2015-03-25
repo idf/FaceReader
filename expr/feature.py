@@ -113,7 +113,7 @@ class GaborFilterCv2(AbstractFeature):
         for theta in np.arange(0, np.pi, np.pi/self._orient_cnt):
             for scale in range(self._scale_cnt):
                 ksize = int(k_max/2**scale+0.5)  # TODO
-                kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, 0, ktype=cv2.CV_32F)
+                kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, 0.5, ktype=cv2.CV_32F)  # psi: (0.5, 93.3%), (0.75, 93.33%)
                 self._kernels.append(kernel)
 
     def compute(self, X, y):

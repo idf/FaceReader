@@ -1,3 +1,5 @@
+import json
+
 __author__ = 'Danyang'
 
 
@@ -40,3 +42,21 @@ class ExcelColumn(object):
         for i in xrange(n):
             self._plus(self.cur, 0)
             yield ''.join(reversed(self.cur))
+
+
+class Displayer(object):
+    def dump(self, obj):
+        """
+
+        :param obj: an object
+        :return: json
+        """
+        return json.dumps(obj, default=lambda o: o.__dict__)
+
+    def display(self, obj):
+        """
+
+        :param obj: an object
+        :return: str
+        """
+        return str(json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, indent=4, separators=(',', ': ')))

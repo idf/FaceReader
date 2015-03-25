@@ -13,8 +13,8 @@ Face Recognition
 
 ## Experiment Run
 in expr/experiment_setup.py  
-To enable ROC: `cv = KFoldCrossValidation(model, k=10, threshold_up=1)` or call `draw_roc(expr)` directly  
-To disable ROC: `cv = KFoldCrossValidation(model, k=10, threshold_up=0)`  
+* To enable ROC: `cv = expr.experiment(Fisherfaces(14), threshold_up=1)` or call `draw_roc(expr)` directly  
+* To disable ROC: `cv = expr.experiment(Fisherfaces(14))`  
 
 ## Git Subtree
 * util 

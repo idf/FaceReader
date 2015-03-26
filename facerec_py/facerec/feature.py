@@ -18,6 +18,9 @@ class AbstractFeature(object):
     def __repr__(self):
         return "AbstractFeature"
 
+    def short_name(self):
+        return "AbstractFeature"
+
 
 class Identity(AbstractFeature):
     """
@@ -51,6 +54,14 @@ class PCA(AbstractFeature):
         PCA over the entire images set
         dimension reduction for entire images set
 
+
+        * Prepare the data with each column representing an image.
+        * Subtract the mean image from the data.
+        * Calculate the eigenvectors and eigenvalues of the covariance matrix.
+        * Find the optimal transformation matrix by selecting the principal components (eigenvectors with largest eigenvalues).
+        * Project the centered data into the subspace.
+        Reference: http://en.wikipedia.org/wiki/Eigenface#Practical_implementation
+
         :param X: The images, which is a Python list of numpy arrays.
         :param y: The corresponding labels (the unique number of the subject, person) in a Python list.
         :return:
@@ -58,20 +69,26 @@ class PCA(AbstractFeature):
         # build the column matrix
         XC = asColumnMatrix(X)
         y = np.asarray(y)
+
         # set a valid number of components
         if self._num_components <= 0 or (self._num_components > XC.shape[1]-1):
             self._num_components = XC.shape[1]-1  # one less dimension
+
         # center dataset
         self._mean = XC.mean(axis=1).reshape(-1,1)
         XC = XC - self._mean
+
         # perform an economy size decomposition (may still allocate too much memory for computation)
         self._eigenvectors, self._eigenvalues, variances = np.linalg.svd(XC, full_matrices=False)
+
         # sort eigenvectors by eigenvalues in descending order
         idx = np.argsort(-self._eigenvalues)
         self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:,idx]
+
         # use only num_components
-        self._eigenvectors = self._eigenvectors[0:,0:self._num_components].copy()
-        self._eigenvalues = self._eigenvalues[0:self._num_components].copy()
+        self._eigenvectors = self._eigenvectors[:, :self._num_components].copy()
+        self._eigenvalues = self._eigenvalues[:self._num_components].copy()
+
         # finally turn singular values into eigenvalues 
         self._eigenvalues = np.power(self._eigenvalues,2) / XC.shape[1]
         # get the features from the given data
@@ -90,7 +107,7 @@ class PCA(AbstractFeature):
         return np.dot(self._eigenvectors.T, X)
 
     def reconstruct(self, X):
-        X = np.dot(self._eigenvectors, X)
+        X = np.dot(self._eigenvectors, X)  # unitary mat
         return X + self._mean
 
     @property
@@ -111,6 +128,9 @@ class PCA(AbstractFeature):
 
     def __repr__(self):
         return "PCA (num_components=%d)" % (self._num_components)
+
+    def short_name(self):
+        return "PCA"
 
 
 class LDA(AbstractFeature):
@@ -176,6 +196,8 @@ class LDA(AbstractFeature):
     def __repr__(self):
         return "LDA (num_components=%d)" % (self._num_components)
 
+    def short_name(self):
+        return "LDA"
 
 class Fisherfaces(AbstractFeature):
     def __init__(self, num_components=0):
@@ -231,7 +253,10 @@ class Fisherfaces(AbstractFeature):
         return self._eigenvectors
 
     def __repr__(self):
-        return "Fisherfaces (num_components=%s)" % (self.num_components)
+        return "Fisherfaces (num_components=%s)" % self.num_components
+
+    def short_name(self):
+        return "Fisher"
 
 from facerec_py.facerec.lbp import LocalDescriptor, ExtendedLBP
 
@@ -282,4 +307,7 @@ class SpatialHistogram(AbstractFeature):
         return np.asarray(E)
 
     def __repr__(self):
-        return "SpatialHistogram (operator=%s, grid=%s)" % (repr(self.lbp_operator), str(self.sz))
+        return "SpatialHistogram LBP (operator=%s, grid=%s)" % (repr(self.lbp_operator), str(self.sz))
+
+    def short_name(self):
+        return "LBP"

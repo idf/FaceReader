@@ -4,7 +4,7 @@ from sklearn.neighbors import NearestNeighbors as nn
 from facerec_py.facerec.feature import *
 from facerec_py.facerec.util import *
 
-__author__ = "Xing Jia"
+__author__ = "XingJia"
 
 class train():
     def __init__(self):
@@ -43,7 +43,7 @@ class NDA(AbstractFeature):
     def __init__(self):
         AbstractFeature.__init__(self)
 
-    def compute(self, X, y, K=1, dim=10, useweights=0):
+    def compute(self, X, y, K=1, useweights=1):
         """
         fit data into to get the NDA model
         :param X: The images, which is a Python list of numpy arrays.
@@ -103,8 +103,15 @@ class NDA(AbstractFeature):
         self.compute_bet_class_cluster_dist()
         self.mnnEx = self.compute_bet_class_cluster_matrix()
         self.diffExtra = self.Wtr - self.mnnEx
-
-        self.bscat = np.dot(self.diffExtra, self.diffExtra.conj().transpose())/self.N
+        if useweights:
+            self.weights = np.minimum(self.valIn[self.K-1, :], self.valEx[self.K-1, :])
+            temp = np.ones((self.Wtr.shape[1],))
+            print temp.shape, self.weights.shape
+            temp = np.dot(temp, self.weights)
+            temp = temp * self.diffExtra
+            self.bscat = np.dot(temp, np.transpose(self.diffExtra)) / self.N
+        else:
+            self.bscat = np.dot(self.diffExtra, self.diffExtra.conj().transpose())/self.N
         self.eigval, self.evec = np.linalg.eig(self.bscat)
         # self.eigval = np.diag(self.eigval)
         self.ind = np.argsort(self.eigval)
@@ -147,7 +154,7 @@ class NDA(AbstractFeature):
         else:
             mnnEx = np.zeros((np.size(self.Wtr, 0), self.train.N))
             for n in range(0, self.train.N):
-                mnnEx[:, n] == np.mean(self.Wtr[:, self.indEx[:, n]], 1)
+                mnnEx[:, n] == np.mean(self.Wtr[:, map(lambda x: int(x), self.indEx[:, n])], 1)
         return mnnEx
 
     def compute_within_class_matrix_whitening(self):
@@ -172,9 +179,12 @@ class NDA(AbstractFeature):
         if self.K == 1:
             mnnInn = self.train.mat[:, map(lambda x: int(x), self.indIn[0])]
         else:
-            mnnIn = np.zeros((self.train.dim, self.train.N))
+            mnnInn = np.zeros((self.train.dim, self.train.N))
             for n in range(0, self.train.N):
-                mnnIn[:,n] = np.mean(self.train.mat[:, self.indIn[:, n]], 2)
+                mean = np.mean(self.train.mat[:, map(lambda x: int(x), self.indIn[:, n])], 1)
+                for x in range(0, self.train.dim):
+                    mnnInn[x, n] = mean[x]
+                # mnnIn[:, n] = np.mean(self.train.mat[:, map(lambda x: int(x), self.indIn[:, n])], 1)
         return mnnInn
 
     def extract(self, X):

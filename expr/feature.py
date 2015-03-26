@@ -4,7 +4,8 @@ from skimage.filters import gabor_kernel  # from skimage.filter._gabor import ga
 
 from facerec_py.facerec import normalization
 from facerec_py.facerec.feature import *
-import cv2
+# import cv2
+from util.commons_util.decorators.algorithms import memoize, memoize_force
 
 __author__ = 'Danyang'
 
@@ -86,6 +87,9 @@ class GaborFilterSki(AbstractFeature):
     def __repr__(self):
         return "GaborFilterSki (freq=%s, theta=%s)" % (str(self._freq_t), str(self._theta_r))
 
+    def short_name(self):
+        return "GaborFilter"
+
 
 class GaborFilterCv2(AbstractFeature):
     """
@@ -103,12 +107,13 @@ class GaborFilterCv2(AbstractFeature):
     def build_filters(self):
         self._kernels = []
         k_max = 199
-        lambd = 10.0
+        lambd = 10.0  # 10.0
+        sigma = 4.0  # 4.0
+        gamma = 0.5
         for theta in np.arange(0, np.pi, np.pi/self._orient_cnt):
             for scale in range(self._scale_cnt):
                 ksize = int(k_max/2**scale+0.5)  # TODO
-                kernel = cv2.getGaborKernel((ksize, ksize), 4.0, theta, lambd, 0.5, 0, ktype=cv2.CV_32F)
-                kernel /= 1.5*kernel.sum()
+                kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, 0, ktype=cv2.CV_32F)
                 self._kernels.append(kernel)
 
     def compute(self, X, y):
@@ -135,16 +140,48 @@ class GaborFilterCv2(AbstractFeature):
         return self.filter(X)
 
     def filter(self, x):
+        return self.fractalius_filter(x)
+
+    def normalize(self, mul, kernel):
+        return kernel / (mul*kernel.sum())
+
+    def simple_filter(self, x):
+        """
+        Simple Gabor Convolve
+        :param x: a single test data
+        :return:
+        """
         feats = np.zeros((len(self._kernels), x.shape[0], x.shape[1]), dtype=np.float32)
+        for i, kernel in enumerate(self._kernels):
+            k = self.normalize(1, kernel)
+            filtered = cv2.filter2D(x, cv2.CV_8UC3, k)
+            feats[i, :, :] = filtered
+        return feats
+
+    def fractalius_filter(self, x):
+        """
+        http://www.redfieldplugins.com/filterFractalius.htm
+
+        only need to get the largest
+        :param x: a single test data
+        :return: features
+        """
+        feats = np.zeros((1, x.shape[0], x.shape[1]), dtype=np.float32)
+
         accum = np.zeros_like(x)
-        for i, v in enumerate(self._kernels):
-            filtered = cv2.filter2D(x, cv2.CV_8UC3, v)
+        for i, kernel in enumerate(self._kernels):
+            k = self.normalize(1.5, kernel)
+            filtered = cv2.filter2D(x, cv2.CV_8UC3, k)
             np.maximum(accum, filtered, accum)
-            feats[i, :, :] = accum
+
+        feats[0, :, :] = accum
         return feats
 
     def __repr__(self):
         return "GaborFilterCv2 (orient_count=%s, scale_count=%s)" % (str(self._orient_cnt), str(self._scale_cnt))
+
+    def short_name(self):
+        return "GaborFilter"
 
 
 class MultiScaleSpatialHistogram(SpatialHistogram):
@@ -193,6 +230,9 @@ class LGBPHS(AbstractFeature):
     def __repr__(self):
         return "LGBPHS(%s)" % (repr(self._model))
 
+    def short_name(self):
+        return "LGBPHS"
+
 
 class LGBPHS2(LGBPHS):
     def __init__(self):
@@ -205,6 +245,9 @@ class LGBPHS2(LGBPHS):
 
     def __repr__(self):
         return "LGBPHS2(%s)"%(repr(self._model))
+
+    def short_name(self):
+        return "LGBPHS"
 
 
 class GaborFilterFisher(AbstractFeature):
@@ -224,4 +267,7 @@ class GaborFilterFisher(AbstractFeature):
 
     def __repr__(self):
         return "GaborFilterFisher"
+
+    def short_name(self):
+        return "GaborFisher"
 

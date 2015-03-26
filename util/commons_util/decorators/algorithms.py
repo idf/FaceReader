@@ -13,3 +13,19 @@ def memoize(func):
             cache[args] = func(*args)
         return cache[args]
     return ret
+
+
+def memoize_force(func):
+    """
+    Similar to to memoize, but force the hash by using its string value
+    But caching performance may be a issue
+
+    :param func: the function, whose result you would like to cached based on input arguments
+    """
+    cache = {}
+    def ret(*args):
+        k = str(args)
+        if k not in cache:
+            cache[k] = func(*args)
+        return cache[k]
+    return ret

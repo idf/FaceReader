@@ -222,7 +222,7 @@ class ValidationStrategy(object):
             print validation_result
 
     def __repr__(self):
-        return "Validation Kernel (model=%s)" % self.model
+        return "Validation Strategy (model=%s, results=%s)"%(self.model, self.validation_results)
 
 
 class KFoldCrossValidation(ValidationStrategy):
@@ -441,7 +441,7 @@ class LeaveOneOutCrossValidation(ValidationStrategy):
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 
     def __repr__(self):
-        return "Leave-One-Out Cross Validation (model=%s)" % self.model
+        return "Leave-One-Out Cross Validation (model=%s, results=%s)"%(self.model, self.validation_results)
 
 
 class LeaveOneClassOutCrossValidation(ValidationStrategy):
@@ -494,7 +494,7 @@ class LeaveOneClassOutCrossValidation(ValidationStrategy):
         self.add(ValidationResult(true_positives, true_negatives, false_positives, false_negatives, description))
 
     def __repr__(self):
-        return "Leave-One-Class-Out Cross Validation (model=%s)" % self.model
+        return "Leave-One-Class-Out Cross Validation (model=%s, results=%s)"%(self.model, self.validation_results)
 
 
 class SimpleValidation(ValidationStrategy):

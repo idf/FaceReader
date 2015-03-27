@@ -14,6 +14,7 @@ from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
 from scipy.interpolate import spline
 import numpy as np
+
 __author__ = 'Danyang'
 
 
@@ -76,7 +77,7 @@ class Experiment(object):
         # Close current figure
         plt.close()
 
-    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0):
+    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0, kNN_k=1):
         """
          Define the Fisherfaces as Feature Extraction method:
         :param feature:
@@ -94,7 +95,7 @@ class Experiment(object):
         # Now read in the image data. This must be a valid path!
         [X, y] = read_images(sys.argv[1])
         # Define a 1-NN classifier with Euclidean Distance:
-        classifier = NearestNeighbor(dist_metric=dist_metric, k=1)
+        classifier = NearestNeighbor(dist_metric=dist_metric, k=kNN_k)
         # Define the model as the combination
         model = PredictableModel(feature=feature, classifier=classifier)
         # Compute the Fisherfaces on the given data (in X) and labels (in y):

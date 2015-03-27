@@ -48,6 +48,7 @@ class PCA(AbstractFeature):
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
         self._num_components = num_components
+        self._total_energy = 0
 
     def compute(self,X,y):
         """
@@ -82,6 +83,8 @@ class PCA(AbstractFeature):
         self._eigenvectors, self._eigenvalues, variances = np.linalg.svd(XC, full_matrices=False)
 
         # sort eigenvectors by eigenvalues in descending order
+        self._total_energy = np.sum(self._eigenvalues)
+
         idx = np.argsort(-self._eigenvalues)
         self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:,idx]
 
@@ -126,11 +129,15 @@ class PCA(AbstractFeature):
     def mean(self):
         return self._mean
 
+    @property
+    def energy_percentage(self):
+        return self._eigenvalues/self._total_energy
+
     def __repr__(self):
-        return "PCA (num_components=%d)" % (self._num_components)
+        return "PCA (num_components=%d)"%self._num_components
 
     def short_name(self):
-        return "PCA"
+        return "PCA: %d"%self._num_components
 
 
 class LDA(AbstractFeature):
@@ -199,6 +206,7 @@ class LDA(AbstractFeature):
     def short_name(self):
         return "LDA"
 
+
 class Fisherfaces(AbstractFeature):
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
@@ -253,10 +261,10 @@ class Fisherfaces(AbstractFeature):
         return self._eigenvectors
 
     def __repr__(self):
-        return "Fisherfaces (num_components=%s)" % self.num_components
+        return "Fisherfaces (num_components=%s)" % self._num_components
 
     def short_name(self):
-        return "Fisher"
+        return "Fisher: %d"%self._num_components
 
 from facerec_py.facerec.lbp import *
 

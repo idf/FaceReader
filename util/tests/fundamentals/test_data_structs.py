@@ -1,3 +1,4 @@
+import random
 from unittest import TestCase
 from util.commons_util.fundamentals.data_structs import *
 __author__ = 'Danyang'
@@ -37,3 +38,21 @@ class TestDisplayer(TestCase):
     "b": 1.0
 }"""
         self.assertEqual(dis.display(b), b_str)
+
+
+class TestSearcher(TestCase):
+    def test_binary_search(self):
+        rand_lst = [int(1000*random.random()) for _ in xrange(100)]
+        target = rand_lst[0]
+        rand_lst.sort()
+
+        def predicate(idx):
+            if rand_lst[idx]==target:
+                return 0
+            elif rand_lst[idx]<target:
+                return -1
+            else:
+                return 1
+
+        idx = Searcher.binary_search(0, 100, predicate)
+        self.assertEqual(target, rand_lst[idx])

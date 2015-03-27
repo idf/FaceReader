@@ -1,16 +1,18 @@
 import json
+import itertools
 
 __author__ = 'Danyang'
 
 
 def argsort(A, f=None):
     """
+
     :type A: list
     :param A:
-    :return:
+    :return: the idx for sorted element in un sorted list
     """
     n = len(A)
-    if f == None:
+    if f is None:
         f = lambda k: A[k]
     return sorted(range(n), key=f)
 
@@ -45,7 +47,8 @@ class ExcelColumn(object):
 
 
 class Displayer(object):
-    def dump(self, obj):
+    @staticmethod
+    def dump(obj):
         """
 
         :param obj: an object
@@ -53,10 +56,44 @@ class Displayer(object):
         """
         return json.dumps(obj, default=lambda o: o.__dict__)
 
-    def display(self, obj):
+    @staticmethod
+    def display(obj):
         """
 
         :param obj: an object
         :return: str
         """
         return str(json.dumps(obj, default=lambda o: o.__dict__, sort_keys=True, indent=4, separators=(',', ': ')))
+
+
+class Searcher(object):
+    @staticmethod
+    def binary_search(low, up, predicate):
+        """
+        Test closure
+
+        [low, up)
+        :param low:
+        :param up:
+        :param predicate: need closure
+        :return:
+        """
+        while low<up:
+            m = (low+up)/2
+            if predicate(m)<0:
+                low = m+1
+            elif predicate(m)>0:
+                up = m
+            else:
+                return m
+        return -1
+
+
+def Wrapper(object):
+    @staticmethod
+    def to_dict(keys, values):
+        """
+        more economical in memory consumption compared to dict(zip(keys, values))
+        :return:
+        """
+        return dict(itertools.izip(keys, values))

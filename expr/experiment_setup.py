@@ -1,4 +1,5 @@
 import sys
+from expr.kernelpca_ski import KPCA
 
 from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
@@ -150,3 +151,4 @@ if __name__ == "__main__":
     expr = Experiment()
     draw_roc(expr)
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
+    # expr.experiment(KPCA(50))

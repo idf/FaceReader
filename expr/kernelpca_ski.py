@@ -43,7 +43,7 @@ class KPCA(AbstractFeature):
         n_features = XC.shape[0]
         # get the features from the given data
         # http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html
-        self._kpca = KernelPCA(n_components=60, kernel="poly", degree=3, coef0=0.0)
+        self._kpca = KernelPCA(n_components=self._num_components, kernel="poly", degree=3, coef0=0.0)
 
         self._kpca.fit(XC.T)
 

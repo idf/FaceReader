@@ -106,7 +106,7 @@ class Experiment(object):
         # Perform a 10-fold cross validation
         k = len(np.unique(y))
         if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=threshold_up)
+        cv = KFoldCrossValidation(model, k=k, threshold_up=threshold_up)  # cv = LeaveOneOutCrossValidation(model)
         cv.validate(X, y)
 
         # And print the result:
@@ -151,4 +151,4 @@ if __name__ == "__main__":
     expr = Experiment()
     draw_roc(expr)
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
-    # expr.experiment(KPCA(50))
+    # expr.experiment(KPCA(60))

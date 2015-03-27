@@ -394,7 +394,7 @@ class LeaveOneOutCrossValidation(ValidationStrategy):
         ... see [Validation]
     """
 
-    def __init__(self, model):
+    def __init__(self, model, k=0):
         """ Intialize Cross-Validation module.
         
         Args:
@@ -402,6 +402,7 @@ class LeaveOneOutCrossValidation(ValidationStrategy):
         """
         super(LeaveOneOutCrossValidation, self).__init__(model=model)
         self.logger = logging.getLogger("facerec.validation.LeaveOneOutCrossValidation")
+        self.k = k
 
     def validate(self, X, y, description="ExperimentName"):
         """ Performs a LOOCV.
@@ -410,17 +411,18 @@ class LeaveOneOutCrossValidation(ValidationStrategy):
             X [dim x num_data] input data to validate on
             y [1 x num_data] classes
         """
-        #(X,y) = shuffle(X,y)
+        X, y = shuffle(X, y)
         true_positives, false_positives, true_negatives, false_negatives = (0, 0, 0, 0)
-        n = y.shape[0]
-        for i in range(0, n):
+        if self.k==0:
+            self.k = y.shape[0]
 
-            self.logger.info("Processing fold %d/%d." % (i + 1, n))
+        for i in range(0, self.k):
+            self.logger.info("Processing fold %d/%d." % (i + 1, self.k))
 
             # create train index list
             trainIdx = []
             trainIdx.extend(range(0, i))
-            trainIdx.extend(range(i + 1, n))
+            trainIdx.extend(range(i + 1, self.k))
 
             # build training data/test data subset
             Xtrain = [X[t] for t in trainIdx]

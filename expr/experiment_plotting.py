@@ -79,19 +79,19 @@ class PlotterLgbphs(Plotter):
 
         self._plot(models)
 
-    def plot_scales(self):
+    def plot_scales(self, r=(1, 5, 9)):  # 1~5
         class LgbphsSub(LGBPHS2):
             def short_name(self):
                 return "scale: %s" % self.model.model1.scale_cnt
 
-        self._plot([LgbphsSub(n_scale=i) for i in xrange(1, 6)])
+        self._plot([LgbphsSub(n_scale=i, lbp_operator=OriginalLBP()) for i in r])
 
-    def plot_orientations(self):
+    def plot_orientations(self, r=(1, 3, 5, 8)):  # 1~8
         class LgbphsSub(LGBPHS2):
             def short_name(self):
                 return "orient: %s" % self.model.model1.orient_cnt
 
-        self._plot([LgbphsSub(n_orient=i) for i in xrange(1, 9)])
+        self._plot([LgbphsSub(n_orient=i, lbp_operator=OriginalLBP()) for i in r])
 
     def plot_histogram(self):
         pass
@@ -99,5 +99,5 @@ class PlotterLgbphs(Plotter):
 
 
 if __name__=="__main__":
-    # PlotterPCA().plot_components()
-    PlotterLgbphs().plot_scales()
+    PlotterPCA().plot_components()
+    # PlotterLgbphs().plot_orientations()

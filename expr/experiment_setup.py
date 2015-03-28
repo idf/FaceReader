@@ -26,7 +26,8 @@ class Drawer(object):
         # ax.set_autoscale_on(False)
         plt.xlabel('FPR')
         plt.ylabel('TPR')
-        plt.rc('axes', color_cycle=['r', 'g', 'b', 'c', 'm', 'y', 'k'])
+        # colors: http://stackoverflow.com/questions/22408237/named-colors-in-matplotlib
+        plt.rc('axes', color_cycle=['r', 'g', 'b', 'c', 'm', 'y', 'k', 'darkgreen', 'chocolate', 'darksalmon', 'darkseagreen', 'yellowgreen'])
         self.is_smooth = smooth
         self._rocs = []
 

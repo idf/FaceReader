@@ -4,17 +4,19 @@ import itertools
 __author__ = 'Danyang'
 
 
-def argsort(A, f=None):
-    """
+class Sorter(object):
+    @staticmethod
+    def argsort(A, f=None):
+        """
 
-    :type A: list
-    :param A:
-    :return: the idx for sorted element in un sorted list
-    """
-    n = len(A)
-    if f is None:
-        f = lambda k: A[k]
-    return sorted(range(n), key=f)
+        :type A: list
+        :param A:
+        :return: the idx for sorted element in un sorted list
+        """
+        n = len(A)
+        if f is None:
+            f = lambda k: A[k]
+        return sorted(range(n), key=f)
 
 
 class ExcelColumn(object):
@@ -89,7 +91,7 @@ class Searcher(object):
         return -1
 
 
-def Wrapper(object):
+class Wrapper(object):
     @staticmethod
     def to_dict(keys, values):
         """
@@ -97,3 +99,12 @@ def Wrapper(object):
         :return:
         """
         return dict(itertools.izip(keys, values))
+
+    @staticmethod
+    def unpack(lst):
+        """
+        :type lst: list[tuple]
+        :param lst:
+        :return:
+        """
+        return zip(*lst)

@@ -261,7 +261,7 @@ if __name__ == "__main__":
     for i in xrange(min(model.feature.eigenvectors.shape[1], 16)):
 	    e = model.feature.eigenvectors[:,i].reshape(X[0].shape)
 	    E.append(minmax_normalize(e,0,255, dtype=np.uint8))
-    # Plot them and store the plot to "python_fisherfaces_fisherfaces.pdf"
+    # Plot them and store the _plot to "python_fisherfaces_fisherfaces.pdf"
     subplot(title="Fisherfaces", images=E, rows=4, cols=4, sptitle="Fisherface", colormap=cm.jet, filename="fisherfaces.png")
     # Perform a 10-fold cross validation
     cv = KFoldCrossValidation(model, k=10)

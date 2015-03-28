@@ -100,8 +100,8 @@ class GaborFilterCv2(AbstractFeature):
     """
     def __init__(self, orient_cnt=8, scale_cnt=5):
         AbstractFeature.__init__(self)
-        self._orient_cnt = orient_cnt
-        self._scale_cnt = scale_cnt
+        self.orient_cnt = orient_cnt
+        self.scale_cnt = scale_cnt
         self._kernels = []
         self.build_filters()
 
@@ -111,8 +111,8 @@ class GaborFilterCv2(AbstractFeature):
         lambd = 10.0  # 10.0
         sigma = 4.0  # 4.0
         gamma = 0.5
-        for theta in np.arange(0, np.pi, np.pi/self._orient_cnt):
-            for scale in range(self._scale_cnt):
+        for theta in np.arange(0, np.pi, np.pi/self.orient_cnt):
+            for scale in range(self.scale_cnt):
                 ksize = int(k_max/2**scale+0.5)  # TODO
                 kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, 0.5, ktype=cv2.CV_32F)  # psi: (0.5, 93.3%), (0.75, 93.33%)
                 self._kernels.append(kernel)
@@ -179,7 +179,7 @@ class GaborFilterCv2(AbstractFeature):
         return feats
 
     def __repr__(self):
-        return "GaborFilterCv2 (orient_count=%s, scale_count=%s)" % (str(self._orient_cnt), str(self._scale_cnt))
+        return "GaborFilterCv2 (orient_count=%s, scale_count=%s)" % (str(self.orient_cnt), str(self.scale_cnt))
 
     def short_name(self):
         return "GaborFilter"
@@ -220,32 +220,31 @@ class LGBPHS(AbstractFeature):
         gabor.filter = gabor.raw_convolve
         lbp = MultiScaleSpatialHistogram()
 
-        self._model = ChainOperator(gabor, lbp)
+        self.model = ChainOperator(gabor, lbp)
 
     def compute(self, X, y):
-        return self._model.compute(X, y)
+        return self.model.compute(X, y)
 
     def extract(self, X):
-        return self._model.extract(X)
+        return self.model.extract(X)
 
     def __repr__(self):
-        return "LGBPHS(%s)" % (repr(self._model))
+        return "LGBPHS(%s)" % (repr(self.model))
 
     def short_name(self):
         return "LGBPHS"
 
 
 class LGBPHS2(LGBPHS):
-    def __init__(self):
+    def __init__(self, n_orient=4, n_scale=2, lbp_operator=LPQ(radius=4)):
         super(LGBPHS, self).__init__()
-        # gabor = GaborFilterSki(freq_t=(0.15, ), theta_r=4)
-        gabor = GaborFilterCv2(4, 2)
-        lbp = ConcatenatedSpatialHistogram()
+        gabor = GaborFilterCv2(n_orient, n_scale)
+        lbp = ConcatenatedSpatialHistogram(lbp_operator=lbp_operator)
 
-        self._model = ChainOperator(gabor, lbp)
+        self.model = ChainOperator(gabor, lbp)
 
     def __repr__(self):
-        return "LGBPHS2(%s)"%(repr(self._model))
+        return "LGBPHS2(%s)"%(repr(self.model))
 
     def short_name(self):
         return "LGBPHS"

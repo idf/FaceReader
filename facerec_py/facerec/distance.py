@@ -93,11 +93,17 @@ class HistogramIntersection(AbstractDistance):
     def __call__(self, p, q):
         p = np.asarray(p).flatten()
         q = np.asarray(q).flatten()
-        return 1/(np.sum(np.minimum(p, q))+1)  # TODO better handling, normalization
+        sim = np.sum(np.minimum(p, q))
+        return 1/(sim+1)
 
 
 class HistogramNormalizationIntersection(AbstractDistance):
     def __init__(self):
+        """
+        Normalized Version of Histogram Intersection
+
+        If the historam is already normalized on construction, then HistogramIntersection should be be used
+        """
         super(self.__class__, self).__init__("HistogramNormalizationIntersection")
         self.hist_int = HistogramIntersection()
 
@@ -107,7 +113,6 @@ class HistogramNormalizationIntersection(AbstractDistance):
         p = normalization.vector_normalize(p)
         q = normalization.vector_normalize(q)
         return self.hist_int(p, q)
-
 
 
 class BinRatioDistance(AbstractDistance):

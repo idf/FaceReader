@@ -2,7 +2,6 @@ import numpy as np
 
 
 class AbstractFeature(object):
-
     def compute(self, X, y):
         raise NotImplementedError("Every AbstractFeature must implement the compute method.")
 
@@ -309,7 +308,10 @@ class SpatialHistogram(AbstractFeature):
         for row in range(0,grid_rows):
             for col in range(0,grid_cols):
                 C = L[row*py:(row+1)*py,col*px:(col+1)*px]
-                H = np.histogram(C, bins=2**self.lbp_operator.neighbors, range=(0, 2**self.lbp_operator.neighbors), normed=True)[0]
+                H = np.histogram(C,
+                                 bins=2**self.lbp_operator.neighbors,
+                                 range=(0, 2**self.lbp_operator.neighbors),
+                                 normed=True)[0]  # normalized
                 # probably useful to apply a mapping?
                 E.extend(H)
         return np.asarray(E)

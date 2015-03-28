@@ -7,7 +7,7 @@ __author__ = 'Danyang'
 class TestDataStructs(TestCase):
     def test_argsort(self):
         A = [3, 2, 1]
-        ret = argsort(A)
+        ret = Sorter.argsort(A)
         self.assertEqual(ret, [2, 1, 0])
 
     def test_excel_column(self):
@@ -56,3 +56,14 @@ class TestSearcher(TestCase):
 
         idx = Searcher.binary_search(0, 100, predicate)
         self.assertEqual(target, rand_lst[idx])
+
+
+class TestWrapper(TestCase):
+    def test_unpack(self):
+        x = [random.randint(0, 100) for _ in xrange(100)]  # () for generators
+        y = [random.randint(0, 100) for _ in xrange(100)]
+        lst = zip(x, y)
+        a, b = Wrapper.unpack(lst)  # generator
+        self.assertEqual(a, tuple(x))
+        self.assertEqual(b, tuple(y))
+

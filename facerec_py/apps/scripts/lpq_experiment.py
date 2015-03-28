@@ -271,7 +271,7 @@ if __name__ == "__main__":
             print key
             experiments[key]['results'][sigma] = prec
 
-    # Make a nice plot of this textual output:
+    # Make a nice _plot of this textual output:
     fig = plt.figure()
     # Holds the legend items:
     plot_legend = []
@@ -282,12 +282,12 @@ if __name__ == "__main__":
         (xvalues, yvalues) = zip(*[(k,v) for k,v in results.iteritems()])
         # Add to the legend:
         plot_legend.append(experiment_name)
-        # Put the results into the plot:
+        # Put the results into the _plot:
         plot_color = experiment_definition['color']
         plot_linestyle = experiment_definition['linestyle']
         plot_marker = experiment_definition['marker']
         plt.plot(sigmas, yvalues, linestyle=plot_linestyle, marker=plot_marker, color=plot_color)
-    # Put the legend below the plot (TODO):
+    # Put the legend below the _plot (TODO):
     plt.legend(plot_legend, prop={'size':6}, numpoints=1, loc='upper center', bbox_to_anchor=(0.5, -0.2),  fancybox=True, shadow=True, ncol=1)
     # Scale y-axis between 0,1 to see the Precision:
     plt.ylim(0,1)

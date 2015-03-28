@@ -7,6 +7,7 @@ Face Recognition
 * [Gabor Fisher](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.1.7675&rep=rep1&type=pdf)
 * [Local Gabor Binary Pattern Histogram Sequence (LGBPHS)](http://www.jdl.ac.cn/user/sgshan/pub/ICCV2005-ZhangShan-LGBP.pdf)
 * [Local Phase Quantization](http://www.ee.oulu.fi/research/imag/mvg/files/pdf/ICISP08.pdf)  
+* [Kernel PCA] (http://vision.ucsd.edu/kriegman-grp/papers/icip00.pdf)
 
 ## Future
 * [GaussianFace](http://arxiv.org/pdf/1404.3840.pdf) 

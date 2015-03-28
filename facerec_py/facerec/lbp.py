@@ -17,6 +17,9 @@ class LocalDescriptor(object):
     def __repr__(self):
         return "LBPOperator (neighbors=%s)" % self._neighbors
 
+    def short_name(self):
+        return "LBPOperator"
+
 
 class OriginalLBP(LocalDescriptor):
     def __init__(self):
@@ -40,9 +43,20 @@ class OriginalLBP(LocalDescriptor):
     def __repr__(self):
         return "OriginalLBP (neighbors=%s)" % self._neighbors
 
+    def short_name(self):
+        return "OriginalLBP"
+
 
 class ExtendedLBP(LocalDescriptor):
     def __init__(self, radius=1, neighbors=8):
+        """
+        aka Circular LBP
+        If a points coordinate on the circle doesn’t correspond to image coordinates, the point get’s interpolated
+
+        :param radius: the size of circular LBP
+        :param neighbors: the number of sample points on the edge of the circle
+        :return:
+        """
         LocalDescriptor.__init__(self, neighbors)
         self._radius = radius
 
@@ -51,7 +65,7 @@ class ExtendedLBP(LocalDescriptor):
         ysize, xsize = X.shape
         # define circle
         angles = 2*np.pi/self._neighbors
-        theta = np.arange(0,2*np.pi,angles)
+        theta = np.arange(0, 2*np.pi, angles)
         # calculate sample points on circle with radius
         sample_points = np.array([-np.sin(theta), np.cos(theta)]).T
         sample_points *= self._radius
@@ -64,15 +78,15 @@ class ExtendedLBP(LocalDescriptor):
         blocksizey = np.ceil(max(maxy,0)) - np.floor(min(miny,0)) + 1
         blocksizex = np.ceil(max(maxx,0)) - np.floor(min(minx,0)) + 1
         # coordinates of origin (0,0) in the block
-        origy =  0 - np.floor(min(miny,0))
-        origx =  0 - np.floor(min(minx,0))
+        origy = 0 - np.floor(min(miny,0))
+        origx = 0 - np.floor(min(minx,0))
         # calculate output image size
         dx = xsize - blocksizex + 1
         dy = ysize - blocksizey + 1
         # get center points
         C = np.asarray(X[origy:origy+dy,origx:origx+dx], dtype=np.uint8)
         result = np.zeros((dy,dx), dtype=np.uint32)
-        for i,p in enumerate(sample_points):
+        for i, p in enumerate(sample_points):
             # get coordinate in the block
             y,x = p + (origy, origx)
             # Calculate floors, ceils and rounds for the x and y.
@@ -104,6 +118,9 @@ class ExtendedLBP(LocalDescriptor):
 
     def __repr__(self):
         return "ExtendedLBP (neighbors=%s, radius=%s)" % (self._neighbors, self._radius)
+
+    def short_name(self):
+        return "ExtendedLBP"
 
 
 class VarLBP(LocalDescriptor):
@@ -176,6 +193,8 @@ class VarLBP(LocalDescriptor):
     def __repr__(self):
         return "VarLBP (neighbors=%s, radius=%s)" % (self._neighbors, self._radius)
 
+    def short_name(self):
+        return "VarLBP"
 
 class LPQ(LocalDescriptor):
     """ This implementation of Local Phase Quantization (LPQ) is a 1:1 adaption of the 
@@ -272,3 +291,6 @@ class LPQ(LocalDescriptor):
 
     def __repr__(self):
         return "LPQ (neighbors=%s, radius=%s)" % (self._neighbors, self._radius)
+
+    def short_name(self):
+        return "LPQ"

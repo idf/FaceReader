@@ -38,12 +38,26 @@ def plot_Fisher():
 
 
 def plot_kNN():
-    pca = PCA(50)
-    expr = Experiment
-    for k in xrange(1, 11):  #  TODO
-        cv = expr.experiment(pca, threshold_up=1, kNN_k=k)
-        expr.plot_roc(cv)
-    expr.show_plot()
+    """
+    plot the graph of varying k of kNN
+    :return:
+    """
+    pca = PCA(40)
+    expr = Experiment()
+
+    plt.figure("PCA precision for different k in kNN")
+    plt.xlabel("k of kNN")
+    plt.ylabel("precision")
+
+    xys = []
+    for k in xrange(1, 41):
+        cv = expr.experiment(pca, threshold_up=0, kNN_k=k, debug=False)
+        xys.append((k, cv.validation_results[0].precision))
+
+    plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
+    plt.show()
+
 
 if __name__=="__main__":
-    plot_PCA()
+    # plot_PCA()
+    plot_kNN()

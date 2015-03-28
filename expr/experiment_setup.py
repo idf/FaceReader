@@ -77,10 +77,16 @@ class Experiment(object):
         # Close current figure
         plt.close()
 
-    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0, kNN_k=1):
+    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0, kNN_k=1, debug=True):
         """
-         Define the Fisherfaces as Feature Extraction method:
-        :param feature:
+        Define the Fisherfaces as Feature Extraction method
+
+        :param feature: feature extraction
+        :param plot: function to plot
+        :param dist_metric: distance metric
+        :param threshold_up: threshold for ROC
+        :param kNN_k: k for kNN classifier
+        :param debug: if true, display the images of wrongly classified face
         :return:
         """
         # This is where we write the images, if an output_dir is given
@@ -107,14 +113,15 @@ class Experiment(object):
         # Perform a 10-fold cross validation
         k = len(np.unique(y))
         if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=threshold_up)  # cv = LeaveOneOutCrossValidation(model)
+        cv = KFoldCrossValidation(model, k=k, threshold_up=threshold_up, debug=debug)  # cv = LeaveOneOutCrossValidation(model)
         cv.validate(X, y)
 
         # And print the result:
         print cv
-        self.logger.info("Cross validation completed; press any key on any image to continue")
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        if debug:
+            self.logger.info("Cross validation completed; press any key on any image to continue")
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
         return cv
 
     def show_plot(self):

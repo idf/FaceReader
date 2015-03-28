@@ -240,7 +240,7 @@ class KFoldCrossValidation(ValidationStrategy):
     Please note: If there are less than k observations in a class, k is set to the minimum of observations available through all classes.
     """
 
-    def __init__(self, model, k=10, threshold_up=1):
+    def __init__(self, model, k=10, threshold_up=1, debug=True):
         """
 
         :param model:
@@ -252,6 +252,7 @@ class KFoldCrossValidation(ValidationStrategy):
         self.threshold_up = threshold_up
         self.k = k
         self.logger = logging.getLogger("facerec.validation.KFoldCrossValidation")
+        self._debug = debug
 
     def validate(self, X, y, description="ExperimentName"):
         """
@@ -328,7 +329,8 @@ class KFoldCrossValidation(ValidationStrategy):
                 r.TP += 1
             else:
                 r.FP += 1
-                self.display_prediction_error(X[j], y[j], prediction)
+                if self._debug:
+                    self.display_prediction_error(X[j], y[j], prediction)
         return r
 
     def display_prediction_error(self, data, actual, predicted):

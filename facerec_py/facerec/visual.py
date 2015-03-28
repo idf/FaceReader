@@ -72,11 +72,11 @@ def subplot(title, images, rows, cols, sptitle="subplot", sptitles=[], colormap=
         fig.savefig(filename)
 
 
-# using plt _plot:
+# using plt plot:
 #filename="/home/philipp/facerec/at_database_vs_accuracy_xy.png"
 #t = np.arange(2., 10., 1.)
 #fig = plt.figure()
-#plt._plot(t, r0, 'k--', t, r1, 'k')
+#plt.plot(t, r0, 'k--', t, r1, 'k')
 #plt.legend(("Eigenfaces", "Fisherfaces"), 'lower right', shadow=True, fancybox=True)
 #plt.ylim(0,1)
 #plt.ylabel('Recognition Rate')

@@ -71,7 +71,7 @@ class Experiment(object):
         for i in xrange(min(model.feature.eigenvectors.shape[1], 16)):
             e = model.feature.eigenvectors[:, i].reshape(X[0].shape)
             E.append(minmax_normalize(e, 0, 255, dtype=np.uint8))
-        # Plot them and store the _plot to "python_fisherfaces_fisherfaces.pdf"
+        # Plot them and store the plot to "python_fisherfaces_fisherfaces.pdf"
         subplot(title="Fisherfaces", images=E, rows=4, cols=4, sptitle="Fisherface", colormap=cm.jet,
                 filename="fisherfaces.png")
         # Close current figure
@@ -82,7 +82,7 @@ class Experiment(object):
         Define the Fisherfaces as Feature Extraction method
 
         :param feature: feature extraction
-        :param plot: function to _plot
+        :param plot: function to plot
         :param dist_metric: distance metric
         :param threshold_up: threshold for ROC
         :param kNN_k: k for kNN classifier

@@ -1,9 +1,4 @@
 import sys
-sys.path.append('/Users/Xingjia/Development/FaceReader')
-sys.path.append('/Users/Xingjia/Development/FaceReader/facerec')
-sys.path.append('/Users/Xingjia/Development/libsvm-3.20/python')
-sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python')
-
 from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
 from facerec_py.facerec.model import PredictableModel
@@ -17,8 +12,8 @@ from expr.feature import *
 from util.commons_util.logger_utils.logger_factory import LoggerFactory
 from scipy.interpolate import spline
 import numpy as np
-
 from nda import NDAFisher, NDA
+
 __author__ = 'Danyang'
 
 
@@ -137,7 +132,7 @@ class Experiment(object):
 if __name__ == "__main__":
     expr = Experiment()
     # cv = expr.experiment(Fisherfaces(14))
-    cv = expr.experiment(NDAFisher())
+    cv = expr.experiment(NDAFisher(300))
     expr.plot_roc(cv)
     # cv = expr.experiment(PCA(50))
     # expr.plot_roc(cv)

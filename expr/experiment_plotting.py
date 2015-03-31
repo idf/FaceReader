@@ -71,7 +71,7 @@ class PlotterLgbphs(Plotter):
     def plot_lbp_algorihtms(self):
         class LgbphsSub(LGBPHS2):
             def short_name(self):
-                return "%s"%self.model.model2.lbp_operator.short_name()
+                return "%s"%self.feature.model2.lbp_operator.short_name()
 
         models = []
         for lbp in (OriginalLBP(), ExtendedLBP(radius=3), LPQ(radius=4)):
@@ -82,14 +82,14 @@ class PlotterLgbphs(Plotter):
     def plot_scales(self, r=(1, 5, 9)):  # 1~5
         class LgbphsSub(LGBPHS2):
             def short_name(self):
-                return "scale: %s" % self.model.model1.scale_cnt
+                return "scale: %s" % self.feature.model1.scale_cnt
 
         self._plot([LgbphsSub(n_scale=i, lbp_operator=OriginalLBP()) for i in r])
 
     def plot_orientations(self, r=xrange(2, 9, 2)):  # 1~8
         class LgbphsSub(LGBPHS2):
             def short_name(self):
-                return "orient: %s" % self.model.model1.orient_cnt
+                return "orient: %s" % self.feature.model1.orient_cnt
 
         self._plot([LgbphsSub(n_orient=i, lbp_operator=OriginalLBP()) for i in r])
 

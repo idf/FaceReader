@@ -15,10 +15,10 @@ class AbstractFeature(object):
         raise NotImplementedError("Not implemented yet (TODO).")
 
     def __repr__(self):
-        return "AbstractFeature"
+        return self.short_name()
 
     def short_name(self):
-        return "AbstractFeature"
+        return self.__class__.__name__
 
 
 class Identity(AbstractFeature):
@@ -200,10 +200,7 @@ class LDA(AbstractFeature):
         return self._eigenvalues
 
     def __repr__(self):
-        return "LDA (num_components=%d)" % (self._num_components)
-
-    def short_name(self):
-        return "LDA"
+        return "LDA (num_components=%d)"%self._num_components
 
 
 class Fisherfaces(AbstractFeature):

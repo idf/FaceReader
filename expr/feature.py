@@ -6,6 +6,7 @@ from facerec_py.facerec import normalization
 from facerec_py.facerec.feature import *
 import cv2
 from facerec_py.facerec.lbp import *
+from facerec_py.facerec.preprocessing import LBPPreprocessing
 from util.commons_util.decorators.algorithms import memoize, memoize_force
 
 __author__ = 'Danyang'
@@ -209,65 +210,55 @@ class ConcatenatedSpatialHistogram(SpatialHistogram):
         return np.asarray(hists)
 
 
-class LGBPHS(AbstractFeature):
+class ChainedFeature(AbstractFeature):
+    def __init__(self, feature1, feature2):
+        if not isinstance(feature1, AbstractFeature) or not isinstance(feature2, AbstractFeature):
+            raise TypeError("model not correct, since must be AbstractFeature")
+
+        self.feature = ChainOperator(feature1, feature2)
+
+    def compute(self, X, y):
+        return self.feature.compute(X, y)
+
+    def extract(self, X):
+        return self.feature.extract(X)
+
+    def __repr__(self):
+        return "%s(%s)"%(self.short_name(), repr(self.feature))
+
+    def short_name(self):
+        return self.__class__.__name__
+
+
+class LGBPHS(ChainedFeature):
     def __init__(self):
         """
         Un-weighted Local Gabor Binary Pattern Histogram Sequence
         :return:
         """
-        super(LGBPHS, self).__init__()
         gabor = GaborFilterSki(theta_r=2, sigma_tuple=(1, ))
         gabor.filter = gabor.raw_convolve
-        lbp = MultiScaleSpatialHistogram()
-
-        self.model = ChainOperator(gabor, lbp)
-
-    def compute(self, X, y):
-        return self.model.compute(X, y)
-
-    def extract(self, X):
-        return self.model.extract(X)
-
-    def __repr__(self):
-        return "LGBPHS(%s)" % (repr(self.model))
-
-    def short_name(self):
-        return "LGBPHS"
+        lbp_hist = MultiScaleSpatialHistogram()
+        super(LGBPHS, self).__init__(gabor, lbp_hist)
 
 
-class LGBPHS2(LGBPHS):
+class LGBPHS2(ChainedFeature):
     def __init__(self, n_orient=4, n_scale=2, lbp_operator=LPQ(radius=4)):
-        super(LGBPHS, self).__init__()
         gabor = GaborFilterCv2(n_orient, n_scale)
-        lbp = ConcatenatedSpatialHistogram(lbp_operator=lbp_operator)
-
-        self.model = ChainOperator(gabor, lbp)
-
-    def __repr__(self):
-        return "LGBPHS2(%s)"%(repr(self.model))
-
-    def short_name(self):
-        return "LGBPHS"
+        lbp_hist = ConcatenatedSpatialHistogram(lbp_operator=lbp_operator)
+        super(LGBPHS2, self).__init__(gabor, lbp_hist)
 
 
-class GaborFilterFisher(AbstractFeature):
+class GaborFisher(ChainedFeature):
     def __init__(self):
-        super(GaborFilterFisher, self).__init__()
-        self._gabor = GaborFilterSki(theta_r=2, sigma_tuple=(1, ))  # decrease param; otherwise memory issue
-        self._gabor.filter = self._gabor.convolve_to_col  # replace
-        self._fisher = Fisherfaces(14)
+        gabor = GaborFilterSki(theta_r=2, sigma_tuple=(1, ))  # decrease param; otherwise memory issue
+        gabor.filter = gabor.convolve_to_col  # replace
+        fisher = Fisherfaces(14)
+        super(GaborFisher, self).__init__(gabor, fisher)
 
-    def compute(self, X, y):
-        model = ChainOperator(self._gabor, self._fisher)
-        return model.compute(X, y)
 
-    def extract(self, X):
-        model = ChainOperator(self._gabor, self._fisher)
-        return model.extract(X)
-
-    def __repr__(self):
-        return "GaborFilterFisher"
-
-    def short_name(self):
-        return "GaborFisher"
-
+class LbpFisher(ChainedFeature):
+    def __init__(self, lbp_operator=ExtendedLBP(radius=11)):  # (6, 11, 14, 15, 19)
+        lbp = LBPPreprocessing(lbp_operator=lbp_operator)  # preprocessing, not histogram
+        fisher = Fisherfaces(18)
+        super(LbpFisher, self).__init__(lbp, fisher)

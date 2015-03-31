@@ -60,7 +60,12 @@ class ExtendedLBP(LocalDescriptor):
         LocalDescriptor.__init__(self, neighbors)
         self._radius = radius
 
-    def __call__(self,X):
+    def __call__(self, X):
+        """
+
+        :param X: an image
+        :return:
+        """
         X = np.asanyarray(X)
         ysize, xsize = X.shape
         # define circle

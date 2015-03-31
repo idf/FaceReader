@@ -174,7 +174,8 @@ def ensemble():
 if __name__ == "__main__":
     expr = Experiment()
     # draw_roc(expr)
-    expr.experiment(SpatialHistogram())
+    # expr.experiment(SpatialHistogram())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(KPCA(60))
+    # expr.experiment(LbpFisher(), debug=False)
     # ensemble()

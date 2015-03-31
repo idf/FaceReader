@@ -86,7 +86,7 @@ class PlotterLgbphs(Plotter):
 
         self._plot([LgbphsSub(n_scale=i, lbp_operator=OriginalLBP()) for i in r])
 
-    def plot_orientations(self, r=(1, 3, 5, 8)):  # 1~8
+    def plot_orientations(self, r=xrange(2, 9, 2)):  # 1~8
         class LgbphsSub(LGBPHS2):
             def short_name(self):
                 return "orient: %s" % self.model.model1.orient_cnt

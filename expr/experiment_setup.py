@@ -3,7 +3,7 @@ from expr.kernelpca_ski import KPCA
 
 from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
-from facerec_py.facerec.model import PredictableModel
+from facerec_py.facerec.model import PredictableModel, FeaturesEnsemblePredictableModel
 from facerec_py.facerec.validation import KFoldCrossValidation
 from facerec_py.facerec.visual import subplot
 from facerec_py.facerec.util import minmax_normalize
@@ -104,7 +104,7 @@ class Experiment(object):
         # Define a 1-NN classifier with Euclidean Distance:
         classifier = NearestNeighbor(dist_metric=dist_metric, k=kNN_k)
         # Define the model as the combination
-        model = PredictableModel(feature=feature, classifier=classifier)
+        model = self._get_model(feature, classifier)
         # Compute the Fisherfaces on the given data (in X) and labels (in y):
         model.compute(X, y)
         # Then turn the first (at most) 16 eigenvectors into grayscale
@@ -125,6 +125,9 @@ class Experiment(object):
             cv2.destroyAllWindows()
         return cv
 
+    def _get_model(self, feature, classifier):
+        return PredictableModel(feature=feature, classifier=classifier)
+
     def show_plot(self):
         """
         Plot the graph at the end
@@ -139,6 +142,11 @@ class Experiment(object):
         :return:
         """
         self._drawer.plot_roc(cv)
+
+
+class FeaturesEnsembleExperiment(Experiment):
+    def _get_model(self, features, classifier):
+        return FeaturesEnsemblePredictableModel(features, classifier)
 
 
 def draw_roc(expr):
@@ -156,9 +164,17 @@ def draw_roc(expr):
 
     expr.show_plot()
 
+
+def ensemble():
+    features = [Fisherfaces(i) for i in xrange(14, 19)]
+    expr = FeaturesEnsembleExperiment()
+    expr.experiment(features, debug=False)
+
+
 if __name__ == "__main__":
     expr = Experiment()
     # draw_roc(expr)
     expr.experiment(SpatialHistogram())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(KPCA(60))
+    # ensemble()

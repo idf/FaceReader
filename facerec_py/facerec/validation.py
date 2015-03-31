@@ -6,7 +6,7 @@ import cv2
 
 import numpy as np
 
-from facerec_py.facerec.model import PredictableModel
+from facerec_py.facerec.model import PredictableModel, AbstractPredictableModel
 from util.commons_util.fundamentals.generators import frange
 
 
@@ -197,7 +197,7 @@ class ValidationStrategy(object):
         
             model [PredictableModel] The model, which is going to be validated.
         """
-        if not isinstance(model, PredictableModel):
+        if not isinstance(model, AbstractPredictableModel):
             raise TypeError("Validation can only validate the type PredictableModel.")
         self.model = model
         self.validation_results = []

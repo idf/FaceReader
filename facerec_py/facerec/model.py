@@ -13,7 +13,7 @@ class AbstractPredictableModel(object):
         raise NotImplementedError("Every AbstractPredictableModel must implement the predict method.")
 
     def __repr__(self):
-        return "AbstractPredictableModel"
+        return self.__class__.__name__
 
 
 class PredictableModel(AbstractPredictableModel):
@@ -38,7 +38,7 @@ class PredictableModel(AbstractPredictableModel):
     def __repr__(self):
         feature_repr = repr(self.feature)
         classifier_repr = repr(self.classifier)
-        return "PredictableModel (feature=%s, classifier=%s)" % (feature_repr, classifier_repr)
+        return "%s(feature=%s, classifier=%s)" % (self.__class__.__name__, feature_repr, classifier_repr)
 
 
 class FeaturesEnsemblePredictableModel(AbstractPredictableModel):
@@ -80,4 +80,4 @@ class FeaturesEnsemblePredictableModel(AbstractPredictableModel):
     def __repr__(self):
         feature_repr = repr(self.features)
         classifier_repr = repr(self.classifiers[0])
-        return "PredictableModel (features=%s, classifier=%s)" % (feature_repr, classifier_repr)
+        return "%s(features=%s, classifier=%s)" % (self.__class__.__name__, feature_repr, classifier_repr)

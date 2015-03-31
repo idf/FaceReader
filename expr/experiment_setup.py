@@ -166,7 +166,8 @@ def draw_roc(expr):
 
 
 def ensemble():
-    features = [Fisherfaces(i) for i in xrange(14, 19)]
+    # features = [Fisherfaces(i) for i in xrange(14, 19)]
+    features = [LbpFisher(ExtendedLBP(i)) for i in (3, 6, 10, 11, 14, 15, 19)]
     expr = FeaturesEnsembleExperiment()
     expr.experiment(features, debug=False)
 
@@ -174,7 +175,7 @@ def ensemble():
 if __name__ == "__main__":
     expr = Experiment()
     # draw_roc(expr)
-    # expr.experiment(SpatialHistogram())
+    expr.experiment(SpatialHistogram())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(KPCA(60))
     # expr.experiment(LbpFisher(), debug=False)

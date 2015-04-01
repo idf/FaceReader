@@ -97,9 +97,34 @@ class PlotterLgbphs(Plotter):
         pass
 
 
+class PlotterKernelPCA(Plotter):
+    def plot_rbf(self, r=(10000.0/(200*200), )):  # TODO
+        class KPCASub(KPCA):
+            def short_name(self):
+                return "%s, gamma=%.4f"%(self._kernel, self._gamma)
+
+        self._plot([KPCASub(kernel="rbf", gamma=i) for i in r])
+
+    def plot_poly(self):
+        """
+        varying degrees
+        """
+        # TODO
+
+    def plot_kernel(self):
+        """
+        varying kernels
+        :return:
+        """
+        # TODO
+
+    # others plotting TODO
+
+
 
 if __name__=="__main__":
-    PlotterPCA().plot_energy()
+    # PlotterPCA().plot_energy()
+    PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()
     # PlotterFisher().plot_components()
     # PlotterKnn().plot_kNN()

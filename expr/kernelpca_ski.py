@@ -7,12 +7,17 @@ __author__ = 'Danyang'
 
 
 class KPCA(AbstractFeature):
-    def __init__(self, num_components=0):
+    def __init__(self, num_components=50, kernel="poly", degree=3, coef0=0.0, gamma=10):
         AbstractFeature.__init__(self)
         self._num_components = num_components
+        self._kernel = kernel
+        self._degree = degree
+        self._coef0 = coef0
+        self._gamma = gamma
+
         self._kpca = None
 
-    def compute(self,X,y):
+    def compute(self, X, y):
         """
         PCA over the entire images set
         dimension reduction for entire images set
@@ -43,7 +48,11 @@ class KPCA(AbstractFeature):
         n_features = XC.shape[0]
         # get the features from the given data
         # http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html
-        self._kpca = KernelPCA(n_components=self._num_components, kernel="poly", degree=3, coef0=0.0)
+        self._kpca = KernelPCA(n_components=self._num_components,
+                               kernel=self._kernel,
+                               degree=self._degree,
+                               coef0=self._coef0,
+                               gamma=self._gamma)
 
         self._kpca.fit(XC.T)
 

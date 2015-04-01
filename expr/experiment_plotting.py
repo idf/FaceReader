@@ -98,28 +98,64 @@ class PlotterLgbphs(Plotter):
 
 
 class PlotterKernelPCA(Plotter):
-    def plot_rbf(self, r=(10000.0/(200*200), )):  # TODO
+    def plot_rbf(self, r=(10000.0/(200*200), 0.5, 0.75, 1.0)):  # TODO
         class KPCASub(KPCA):
             def short_name(self):
                 return "%s, gamma=%.4f"%(self._kernel, self._gamma)
 
         self._plot([KPCASub(kernel="rbf", gamma=i) for i in r])
 
-    def plot_poly(self):
+    def plot_poly_degree(self):
         """
-        varying degrees
+        varying degrees for poly
         """
-        # TODO
+        models = []
+        class KPCA_poly(KPCA):
+            def short_name(self):
+                return "poly (degree: %d)" %self._degree
+            
+        for degree in xrange(1, 6):
+            models.append(KPCA_poly(50, "poly", degree))
+        self._plot(models)
 
-    def plot_kernel(self):
+    def plot_kernels(self):
         """
         varying kernels
         :return:
         """
-        # TODO
+        kernels = ["poly", "sigmoid", "cosine", "rbf"]
+        models = []
+        for kernel in kernels:
+            models.append(KPCA(50, kernel))
+        self._plot(models)
 
     # others plotting TODO
+    def plot_poly_coef0(self, r = (0.0, 20.0, 40.0, 60.0, 80.0)):
+        """
+        varying coef0 values for poly
+        """
+        class KPCA_coef0(KPCA):
+            def short_name(self):
+                return "poly (coef0: %.2f)" %self._coef0
+        self._plot([KPCA_coef0(kernel="poly", coef0 = i) for i in r])
 
+    def plot_poly_gamma(self, r = (10.0, 40.0, 70.0, 100.0, 130.0)):
+        """
+        varying gamma values for poly
+        """
+        class KPCA_gamma(KPCA):
+            def short_name(self):
+                return "poly (gamma: %.2f)" %self._gamma
+        self._plot([KPCA_gamma(kernel = "poly", gamma = i) for i in r])
+
+    def plot_sigmoid(self, r = (10.0, 20.0, 30.0, 40.0, 50.0)):
+        """
+        varying gamma values for sigmoid
+        """
+        class KPCA_sigmoid(KPCA):
+            def short_name(self):
+                return "sigmoid (gamma: %.2f)"%self._gamma
+        self._plot([KPCA_sigmoid(kernel = "sigmoid", gamma = i) for i in r])
 
 class PlotterEnsemble(Plotter):
     def plot_fisher(self):

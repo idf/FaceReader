@@ -81,6 +81,9 @@ class PCA(AbstractFeature):
         # perform an economy size decomposition (may still allocate too much memory for computation)
         self._eigenvectors, self._eigenvalues, variances = np.linalg.svd(XC, full_matrices=False)
 
+        # turn singular values into eigenvalues
+        self._eigenvalues = np.power(self._eigenvalues,2) / XC.shape[1]
+
         # sort eigenvectors by eigenvalues in descending order
         self._total_energy = np.sum(self._eigenvalues)
 
@@ -91,8 +94,6 @@ class PCA(AbstractFeature):
         self._eigenvectors = self._eigenvectors[:, :self._num_components].copy()
         self._eigenvalues = self._eigenvalues[:self._num_components].copy()
 
-        # finally turn singular values into eigenvalues 
-        self._eigenvalues = np.power(self._eigenvalues,2) / XC.shape[1]
         # get the features from the given data
         features = []
         for x in X:
@@ -130,7 +131,7 @@ class PCA(AbstractFeature):
 
     @property
     def energy_percentage(self):
-        return self._eigenvalues/self._total_energy
+        return np.sum(self._eigenvalues)/self._total_energy
 
     def __repr__(self):
         return "PCA (num_components=%d)"%self._num_components

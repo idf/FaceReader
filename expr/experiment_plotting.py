@@ -28,7 +28,7 @@ class PlotterPCA(Plotter):
 
         class PCA_energy(PCA):
             def short_name(self):
-                return "PCA: %.6f"%self.energy_percentage
+                return "PCA: %.2f%%"%(self.energy_percentage*100)
 
         for num_component in xrange(20, 110, 40):  # TODO
             models.append(PCA_energy(num_component))

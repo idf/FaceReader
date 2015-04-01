@@ -121,6 +121,21 @@ class PlotterKernelPCA(Plotter):
     # others plotting TODO
 
 
+class PlotterEnsemble(Plotter):
+    def plot_fisher(self):
+        expr = FeaturesEnsembleExperiment()
+        plt.axis([0, 0.5, 0.9, 1.001])
+
+        features = [LbpFisher(ExtendedLBP(i)) for i in (3, 6, 10, 11, 14, 15, 19)]   # (3, 6, 10, 11, 14, 15, 19)
+        cv = expr.experiment(features, threshold_up=1, debug=False)
+        expr.plot_roc(cv)
+
+        features = [Fisherfaces(14)]
+        cv = expr.experiment(features, threshold_up=1, debug=False)
+        expr.plot_roc(cv)
+
+        expr.show_plot()
+
 
 if __name__=="__main__":
     # PlotterPCA().plot_energy()
@@ -129,3 +144,4 @@ if __name__=="__main__":
     # PlotterFisher().plot_components()
     # PlotterKnn().plot_kNN()
     # PlotterLgbphs().plot_orientations()
+    # PlotterEnsemble().plot_fisher()

@@ -46,6 +46,7 @@ def inverse_dissim(X):
     :return:
     """
     X = np.asarray(X)
+    X = zscore(X)
     X = minmax(X, 0, 10)
     return 1./(1+X)
 
@@ -54,7 +55,7 @@ def vector_normalize(x):
     return x / np.linalg.norm(x)
 
 
-def gaussian_kernel(X, mu, sig):
+def gaussian_kernel(X, mu=None, sig=None):
     """
     gaussian kernel.
     convert distance to similarity by setting mu=0
@@ -64,4 +65,9 @@ def gaussian_kernel(X, mu, sig):
     :return:
     """
     X = np.asarray(X)
-    return np.exp(-np.sum(np.power(X-mu, 2))/(2*sig**2))
+    if mu is None:
+        mu = X.mean()
+    if sig is None:
+        sig = X.std()
+
+    return np.exp(-np.power(X-mu, 2)/(2*sig**2))

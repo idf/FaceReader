@@ -77,7 +77,15 @@ class FeaturesEnsemblePredictableModel(AbstractPredictableModel):
 
         return None
 
+    @property
+    def feature(self):
+        return self.features[0]
+
+    @property
+    def classifier(self):
+        return self.classifiers[0]
+
     def __repr__(self):
         feature_repr = repr(self.features)
-        classifier_repr = repr(self.classifiers[0])
+        classifier_repr = repr(self.classifier)
         return "%s(features=%s, classifier=%s)" % (self.__class__.__name__, feature_repr, classifier_repr)

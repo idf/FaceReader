@@ -10,7 +10,7 @@ class Plotter(object):
     def _plot(self, models):
         expr = Experiment()
         for model in models:
-            cv = expr.experiment(model, threshold_up=1, kNN_k = 1)
+            cv = expr.experiment(model, threshold_up=1)
             expr.plot_roc(cv)
         expr.show_plot()
 
@@ -28,9 +28,7 @@ class PlotterPCA(Plotter):
 
         class PCA_energy(PCA):
             def short_name(self):
-                # energy = np.count_nonzero(self._eigenvalues)
-                percentage = (np.sum(self._eigenvalues))/self._total_energy
-                return "PCA: %.6f"%percentage
+                return "PCA: %.6f"%self.energy_percentage
 
         for num_component in xrange(20, 110, 40):  # TODO
             models.append(PCA_energy(num_component))
@@ -61,8 +59,8 @@ class PlotterKnn(object):
         plt.ylabel("precision")
 
         xys = []
-        for k in xrange(1, 41):
-            cv = expr.experiment(pca, threshold_up=0, kNN_k=k, debug = False)
+        for k in xrange(1, 41):  # TODO
+            cv = expr.experiment(pca, threshold_up=0, kNN_k=k, debug=False)
             xys.append((k, cv.validation_results[0].precision))
 
         plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
@@ -101,8 +99,8 @@ class PlotterLgbphs(Plotter):
 
 
 if __name__=="__main__":
-    # PlotterPCA().plot_energy()
-    PlotterPCA().plot_components()
+    PlotterPCA().plot_energy()
+    # PlotterPCA().plot_components()
     # PlotterFisher().plot_components()
     # PlotterKnn().plot_kNN()
     # PlotterLgbphs().plot_orientations()

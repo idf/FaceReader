@@ -130,7 +130,7 @@ class PCA(AbstractFeature):
 
     @property
     def energy_percentage(self):
-        return self._eigenvalues/self._total_energy
+        return np.sum(self._eigenvalues)/self._total_energy
 
     def __repr__(self):
         return "PCA (num_components=%d)"%self._num_components

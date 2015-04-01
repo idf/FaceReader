@@ -44,6 +44,13 @@ class Drawer(object):
         # Extract FPR
         FPRs = [r.FPR for r in cv.validation_results]
         TPRs = [r.TPR for r in cv.validation_results]
+
+        # add (0, 0), and (1, 1)
+        FPRs.append(0.0)
+        TPRs.append(0.0)
+        FPRs.append(1.0)
+        TPRs.append(1.0)
+
         if self.is_smooth:
             FPRs, TPRs = self.smooth(FPRs, TPRs)
 
@@ -63,9 +70,9 @@ class Drawer(object):
 
 
 class Experiment(object):
-    def __init__(self):
+    def __init__(self, smooth=False):
         self.logger = LoggerFactory().getConsoleLogger("facerec")
-        self._drawer = Drawer()
+        self._drawer = Drawer(smooth)
 
     def plot_fisher(self, X, model):
         E = []

@@ -18,7 +18,7 @@ class Plotter(object):
 class PlotterPCA(Plotter):
     def plot_components(self):
         models = []
-        for num_component in xrange(30, 160, 50):  # TODO
+        for num_component in xrange(10, 150, 30):  # TODO
             models.append(PCA(num_component))
 
         self._plot(models)
@@ -39,7 +39,7 @@ class PlotterPCA(Plotter):
 class PlotterFisher(Plotter):
     def plot_components(self):
         models = []
-        for num_components in xrange(1, 16, 5):  # TODO
+        for num_components in xrange(1, 16, 3):  # TODO
             models.append(Fisherfaces(num_components))
 
         self._plot(models)

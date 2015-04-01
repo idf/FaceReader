@@ -10,7 +10,7 @@ class Plotter(object):
     def _plot(self, models):
         expr = Experiment()
         for model in models:
-            cv = expr.experiment(model, threshold_up=1, kNN_k = 1)
+            cv = expr.experiment(model, threshold_up=1)
             expr.plot_roc(cv)
         expr.show_plot()
 

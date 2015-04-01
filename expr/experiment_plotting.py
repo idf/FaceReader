@@ -1,5 +1,5 @@
 from experiment_setup import *
-
+import numpy as np
 __author__ = 'Danyang'
 
 
@@ -18,7 +18,7 @@ class Plotter(object):
 class PlotterPCA(Plotter):
     def plot_components(self):
         models = []
-        for num_component in xrange(30, 50, 10):  # TODO
+        for num_component in xrange(30, 160, 50):  # TODO
             models.append(PCA(num_component))
 
         self._plot(models)
@@ -28,9 +28,11 @@ class PlotterPCA(Plotter):
 
         class PCA_energy(PCA):
             def short_name(self):
-                return "PCA: %.6f"%self.energy_percentage()
+                # energy = np.count_nonzero(self._eigenvalues)
+                percentage = (np.sum(self._eigenvalues))/self._total_energy
+                return "PCA: %.6f"%percentage
 
-        for num_component in xrange(20, 100, 5):  # TODO
+        for num_component in xrange(20, 110, 40):  # TODO
             models.append(PCA_energy(num_component))
 
         self._plot(models)
@@ -39,7 +41,7 @@ class PlotterPCA(Plotter):
 class PlotterFisher(Plotter):
     def plot_components(self):
         models = []
-        for num_components in xrange(1, 15):  # TODO
+        for num_components in xrange(1, 16, 5):  # TODO
             models.append(Fisherfaces(num_components))
 
         self._plot(models)
@@ -60,7 +62,7 @@ class PlotterKnn(object):
 
         xys = []
         for k in xrange(1, 41):
-            cv = expr.experiment(pca, threshold_up=0, kNN_k=k, debug=False)
+            cv = expr.experiment(pca, threshold_up=0, kNN_k=k, debug = False)
             xys.append((k, cv.validation_results[0].precision))
 
         plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
@@ -99,5 +101,8 @@ class PlotterLgbphs(Plotter):
 
 
 if __name__=="__main__":
+    # PlotterPCA().plot_energy()
     PlotterPCA().plot_components()
+    # PlotterFisher().plot_components()
+    # PlotterKnn().plot_kNN()
     # PlotterLgbphs().plot_orientations()

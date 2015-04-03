@@ -264,7 +264,7 @@ class KFoldCrossValidation(ValidationStrategy):
         """
         if not self.froze_shuffle:
             X, y = shuffle(X, y)
-            
+
         c = len(np.unique(y))
         foldIndices = []
         n = np.iinfo(np.int).max  # n, min input data number for every class

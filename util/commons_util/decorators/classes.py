@@ -1,6 +1,8 @@
 import warnings
 import functools
 __author__ = 'Danyang'
+
+
 def Override(interface_class):
     """
     provide java-like @Override annotation
@@ -20,6 +22,8 @@ def Override(interface_class):
 
 
 warnings.simplefilter('always', DeprecationWarning)
+
+
 def Deprecated(func, msg=None):
     """
     provide java-like @Deprecated annotation

@@ -318,4 +318,4 @@ class SpatialHistogram(AbstractFeature):
         return "SpatialHistogram LBP (operator=%s, grid=%s)" % (repr(self.lbp_operator), str(self.sz))
 
     def short_name(self):
-        return "LBP"
+        return "LBP Histogram"

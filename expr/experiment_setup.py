@@ -185,7 +185,7 @@ def draw_roc(expr):
     expr.show_plot()
 
 
-def ensemble():
+def ensemble_lbp_fisher():
     # features = [Fisherfaces(i) for i in xrange(14, 19)]
     features = [LbpFisher(ExtendedLBP(i)) for i in (3, 6, 10, 11, 14, 15, 19)]
     expr = FeaturesEnsembleExperiment()
@@ -201,4 +201,4 @@ if __name__ == "__main__":
     # expr.experiment(Fisherfaces(15), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
-    # ensemble()
+    # ensemble_lbp_fisher()

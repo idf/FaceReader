@@ -142,12 +142,12 @@ class GaborFilterCv2(AbstractFeature):
         return self.filter(X)
 
     def filter(self, x):
-        return self.fractalius_filter(x)
+        return self.__simple_filter(x)
 
     def normalize(self, mul, kernel):
         return kernel / (mul*kernel.sum())
 
-    def simple_filter(self, x):
+    def __simple_filter(self, x):
         """
         Simple Gabor Convolve
         :param x: a single test data
@@ -160,7 +160,7 @@ class GaborFilterCv2(AbstractFeature):
             feats[i, :, :] = filtered
         return feats
 
-    def fractalius_filter(self, x):
+    def __fractalius_filter(self, x):
         """
         http://www.redfieldplugins.com/filterFractalius.htm
 
@@ -262,3 +262,11 @@ class LbpFisher(ChainedFeature):
         lbp = LBPPreprocessing(lbp_operator=lbp_operator)  # preprocessing, not histogram
         fisher = Fisherfaces(14)
         super(LbpFisher, self).__init__(lbp, fisher)
+
+
+class GaborLbpFisher(ChainedFeature):
+    def __init__(self, n_orient=4, n_scale=2, lbp_operator=ExtendedLBP(radius=11)):
+        # TODO
+        gabor = GaborFilterCv2(n_orient, n_scale)
+        lbp_fisher = LbpFisher(lbp_operator)
+        super(GaborLbpFisher, self).__init__(gabor, lbp_fisher)

@@ -12,7 +12,7 @@ class Plotter(object):
     def _plot(self, models):
         expr = Experiment(froze_shuffle=True)
         for model in models:
-            cv = expr.experiment(model, threshold_up=1)
+            cv = expr.experiment(model, threshold_up=1, debug=False)
             expr.plot_roc(cv)
         expr.show_plot()
 
@@ -20,7 +20,6 @@ class Plotter(object):
         expr = Experiment(froze_shuffle=True)
         for model in models:
             expr.experiment(model, threshold_up=0, debug=False)
-
 
 
 class PlotterPCA(Plotter):
@@ -89,7 +88,19 @@ class PlotterLgbphs(Plotter):
         self._plot(models)
 
     @print_func_name
-    def plot_scales(self, r=(1, 3, 5, 7, 9)):  # 1~5
+    def plot_gabor(self):
+        class LgbphsSub(LGBPHS2):
+            def short_name(self):
+                return "LGBPHS"
+
+        models = [LgbphsSub(lbp_operator=ExtendedLBP(3)),
+                  SpatialHistogram(lbp_operator=ExtendedLBP(3))
+        ]
+        self._plot(models)
+
+
+    @print_func_name
+    def plot_scales(self, r=xrange(1, 10, 4)):  # 1~5
         class LgbphsSub(LGBPHS2):
             def short_name(self):
                 return "scale: %s" % self.feature.model1.scale_cnt
@@ -97,12 +108,11 @@ class PlotterLgbphs(Plotter):
         self._plot([LgbphsSub(n_scale=i, lbp_operator=ExtendedLBP(3)) for i in r])
 
     @print_func_name
-    def get_precision_scales(self, r=(1, 3, 5, 7, 9)):
-        print sys._getframe().f_code.co_name
+    def get_precision_scales(self, r=xrange(1, 10, 4)):
         self._simple_run([LGBPHS2(n_scale=i, lbp_operator=ExtendedLBP(3)) for i in r])
 
     @print_func_name
-    def plot_orientations(self, r=xrange(2, 9, 2)):  # 1~8
+    def plot_orientations(self, r=xrange(2, 9, 3)):  # 1~8
         class LgbphsSub(LGBPHS2):
             def short_name(self):
                 return "orient: %s" % self.feature.model1.orient_cnt
@@ -110,7 +120,7 @@ class PlotterLgbphs(Plotter):
         self._plot([LgbphsSub(n_orient=i, lbp_operator=ExtendedLBP(3)) for i in r])
 
     @print_func_name
-    def get_precisions_orientations(self, r=xrange(2, 9, 2)):
+    def get_precisions_orientations(self, r=xrange(2, 9, 3)):
         self._simple_run([LGBPHS2(n_orient=i, lbp_operator=ExtendedLBP(3)) for i in r])
 
     def plot_histogram(self):
@@ -214,6 +224,9 @@ if __name__=="__main__":
     # PlotterFisher().plot_components()
     # PlotterKnn().plot_kNN()
     # PlotterLgbphs().plot_scales()
-    PlotterLgbphs().plot_orientations()
+    # PlotterLgbphs().get_precision_scales()
+    # PlotterLgbphs().plot_orientations()
+    # PlotterLgbphs().get_precisions_orientations()
+    PlotterLgbphs().plot_gabor()
     # PlotterLgbphs().plot_lbp_algorihtms()
     # PlotterEnsemble().plot_fisher()

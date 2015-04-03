@@ -4,7 +4,7 @@ from expr.kernelpca_ski import KPCA
 from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
 from facerec_py.facerec.model import PredictableModel, FeaturesEnsemblePredictableModel
-from facerec_py.facerec.validation import KFoldCrossValidation
+from facerec_py.facerec.validation import KFoldCrossValidation, shuffle
 from facerec_py.facerec.visual import subplot
 from facerec_py.facerec.util import minmax_normalize
 from expr.read_dataset import read_images
@@ -70,9 +70,28 @@ class Drawer(object):
 
 
 class Experiment(object):
-    def __init__(self, smooth=False):
+    def __init__(self, smooth=False, froze_shuffle=False):
         self.logger = LoggerFactory().getConsoleLogger("facerec")
         self._drawer = Drawer(smooth)
+        self.X, self.y = shuffle(*self.read())  # shuffle once
+        self.froze_shuffle = froze_shuffle  # whether to froze the subsequent shuffling in validation
+
+    def read(self):
+        # This is where we write the images, if an output_dir is given
+        # in command line:
+        out_dir = None
+        # You'll need at least a path to your image data, please see
+        # the tutorial coming with this source code on how to prepare
+        # your image data:
+        if len(sys.argv) < 2:
+            print "USAGE: experiment_setup.py </path/to/images>"
+            sys.exit()
+        # Now read in the image data. This must be a valid path!
+        X, y = read_images(sys.argv[1])
+
+        X = np.asarray(X)
+        y = np.asarray(y)
+        return X, y
 
     def plot_fisher(self, X, model):
         E = []
@@ -97,36 +116,26 @@ class Experiment(object):
         :param debug: if true, display the images of wrongly classified face
         :return:
         """
-        # This is where we write the images, if an output_dir is given
-        # in command line:
-        out_dir = None
-        # You'll need at least a path to your image data, please see
-        # the tutorial coming with this source code on how to prepare
-        # your image data:
-        if len(sys.argv) < 2:
-            print "USAGE: experiment_setup.py </path/to/images>"
-            sys.exit()
-        # Now read in the image data. This must be a valid path!
-        [X, y] = read_images(sys.argv[1])
         # Define a 1-NN classifier with Euclidean Distance:
         classifier = NearestNeighbor(dist_metric=dist_metric, k=kNN_k)
         # Define the model as the combination
         model = self._get_model(feature, classifier)
         # Compute the Fisherfaces on the given data (in X) and labels (in y):
-        model.compute(X, y)
+        model.compute(self.X, self.y)
         # Then turn the first (at most) 16 eigenvectors into grayscale
         # images (note: eigenvectors are stored by column!)
         if plot:
-            plot(X, model)
+            plot(self.X, model)
         # Perform a k-fold cross validation
         # Perform a k-fold cross validation
         if number_folds is None:
-            number_folds = len(np.unique(y))
+            number_folds = len(np.unique(self.y))
             if number_folds>15: number_folds = 10
 
 
-        cv = KFoldCrossValidation(model, k=number_folds, threshold_up=threshold_up, debug=debug)  # cv = LeaveOneOutCrossValidation(model)
-        cv.validate(X, y)
+        cv = KFoldCrossValidation(model, k=number_folds, threshold_up=threshold_up, froze_shuffle=self.froze_shuffle, debug=debug)
+        # cv = LeaveOneOutCrossValidation(model)
+        cv.validate(self.X, self.y)
 
         # And print the result:
         print cv

@@ -239,7 +239,7 @@ class KFoldCrossValidation(ValidationStrategy):
     Please note: If there are less than k observations in a class, k is set to the minimum of observations available through all classes.
     """
 
-    def __init__(self, model, k=10, threshold_up=1, debug=True):
+    def __init__(self, model, k=10, threshold_up=1, froze_shuffle=False, debug=True):
         """
 
         :param model:
@@ -252,6 +252,7 @@ class KFoldCrossValidation(ValidationStrategy):
         self.k = k
         self.logger = logging.getLogger("facerec.validation.KFoldCrossValidation")
         self._debug = debug
+        self.froze_shuffle = froze_shuffle
 
     def validate(self, X, y, description="ExperimentName"):
         """
@@ -261,9 +262,9 @@ class KFoldCrossValidation(ValidationStrategy):
         :param description:
         :return:
         """
-        X = np.asarray(X)
-        y = np.asarray(y)
-        X, y = shuffle(X, y)
+        if not self.froze_shuffle:
+            X, y = shuffle(X, y)
+            
         c = len(np.unique(y))
         foldIndices = []
         n = np.iinfo(np.int).max  # n, min input data number for every class

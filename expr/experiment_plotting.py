@@ -110,6 +110,7 @@ class PlotterKernelPCA(Plotter):
         varying degrees for poly
         """
         models = []
+
         class KPCA_poly(KPCA):
             def short_name(self):
                 return "poly (degree: %d)" %self._degree
@@ -160,7 +161,7 @@ class PlotterKernelPCA(Plotter):
 
 class PlotterEnsemble(Plotter):
     def plot_fisher(self):
-        expr = FeaturesEnsembleExperiment()
+        expr = FeaturesEnsembleExperiment(froze_shuffle=True)
         plt.axis([0, 0.5, 0.9, 1.001])
 
         class LbpFisherSub(LbpFisher):

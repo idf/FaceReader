@@ -24,7 +24,7 @@ class LbpIntermidiate(object):
         y = np.asarray(y)
         return X, y
 
-    def experiment(self):
+    def draw(self):
         hstack = lambda x, y: np.hstack((x, y))
         org_imgs = reduce(hstack, self.X)
         lbp_imgs = reduce(hstack, map(lambda x: self.lbp(x).astype(np.uint8), self.X))
@@ -35,4 +35,4 @@ class LbpIntermidiate(object):
 
 
 if __name__ == "__main__":
-    LbpIntermidiate().experiment()
+    LbpIntermidiate().draw()

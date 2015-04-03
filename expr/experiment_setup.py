@@ -193,11 +193,12 @@ def ensemble():
 
 
 if __name__ == "__main__":
-    expr = Experiment()
+    expr = Experiment(froze_shuffle=True)
     # draw_roc(expr)
-    expr.experiment(SpatialHistogram())
+    # expr.experiment(SpatialHistogram())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(KPCA(60))
-    # expr.experiment(Fisherfaces(), debug=False)
+    # expr.experiment(Fisherfaces(15), debug=False)
+    # expr.experiment(LbpFisher(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # ensemble()

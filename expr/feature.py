@@ -108,7 +108,7 @@ class GaborFilterCv2(AbstractFeature):
 
     def build_filters(self):
         self._kernels = []
-        k_max = 199
+        k_max = 399
         lambd = 10.0  # 10.0
         sigma = 4.0  # 4.0
         gamma = 0.5
@@ -243,7 +243,7 @@ class LGBPHS(ChainedFeature):
 
 
 class LGBPHS2(ChainedFeature):
-    def __init__(self, n_orient=4, n_scale=2, lbp_operator=LPQ(radius=4)):
+    def __init__(self, n_orient=4, n_scale=2, lbp_operator=ExtendedLBP(radius=3)):  # alternatively LPQ
         gabor = GaborFilterCv2(n_orient, n_scale)
         lbp_hist = ConcatenatedSpatialHistogram(lbp_operator=lbp_operator)
         super(LGBPHS2, self).__init__(gabor, lbp_hist)
@@ -260,5 +260,5 @@ class GaborFisher(ChainedFeature):
 class LbpFisher(ChainedFeature):
     def __init__(self, lbp_operator=ExtendedLBP(radius=11)):  # (6, 11, 14, 15, 19)
         lbp = LBPPreprocessing(lbp_operator=lbp_operator)  # preprocessing, not histogram
-        fisher = Fisherfaces(18)
+        fisher = Fisherfaces(14)
         super(LbpFisher, self).__init__(lbp, fisher)

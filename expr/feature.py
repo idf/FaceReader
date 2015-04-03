@@ -4,7 +4,7 @@ from skimage.filters import gabor_kernel  # from skimage.filter._gabor import ga
 
 from facerec_py.facerec import normalization
 from facerec_py.facerec.feature import *
-import cv2
+import this as cv2
 from facerec_py.facerec.lbp import *
 from facerec_py.facerec.preprocessing import LBPPreprocessing
 from util.commons_util.decorators.algorithms import memoize, memoize_force

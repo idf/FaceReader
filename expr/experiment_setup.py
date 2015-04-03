@@ -217,7 +217,7 @@ def ensemble_lbp_fisher():
 if __name__ == "__main__":
     expr = Experiment(froze_shuffle=True)
     # draw_roc(expr)
-    # expr.experiment(SpatialHistogram())
+    # expr.experiment(SpatialHistogram(), debug=False, threshold_up=1)
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(KPCA(60))
     # expr.experiment(Fisherfaces(15), plot=expr.plot_fisher, debug=False)

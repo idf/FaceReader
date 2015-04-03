@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import math as math
 import random as random
 import logging
-import cv2
+import this as cv2
 
 import numpy as np
 

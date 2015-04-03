@@ -80,10 +80,9 @@ def shuffle(X, y):
             Shuffled input arrays.
     """
     idx = np.argsort([random.random() for _ in xrange(len(y))])  # Returns the indices that would sort an array.
-    y = np.asarray(y)
     X = [X[i] for i in idx]
     y = y[idx]
-    return (X, y)
+    return X, y
 
 
 def slice_2d(X, rows, cols):
@@ -262,6 +261,8 @@ class KFoldCrossValidation(ValidationStrategy):
         :param description:
         :return:
         """
+        X = np.asarray(X)
+        y = np.asarray(y)
         X, y = shuffle(X, y)
         c = len(np.unique(y))
         foldIndices = []

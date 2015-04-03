@@ -85,7 +85,7 @@ class Experiment(object):
         # Close current figure
         plt.close()
 
-    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0, kNN_k=1, debug=True):
+    def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0, kNN_k=1, number_folds=None, debug=True):
         """
         Define the Fisherfaces as Feature Extraction method
 
@@ -118,10 +118,14 @@ class Experiment(object):
         # images (note: eigenvectors are stored by column!)
         if plot:
             plot(X, model)
-        # Perform a 10-fold cross validation
-        k = len(np.unique(y))
-        if k>15: k = 10
-        cv = KFoldCrossValidation(model, k=k, threshold_up=threshold_up, debug=debug)  # cv = LeaveOneOutCrossValidation(model)
+        # Perform a k-fold cross validation
+        # Perform a k-fold cross validation
+        if number_folds is None:
+            number_folds = len(np.unique(y))
+            if number_folds>15: number_folds = 10
+
+
+        cv = KFoldCrossValidation(model, k=number_folds, threshold_up=threshold_up, debug=debug)  # cv = LeaveOneOutCrossValidation(model)
         cv.validate(X, y)
 
         # And print the result:
@@ -185,5 +189,6 @@ if __name__ == "__main__":
     expr.experiment(SpatialHistogram())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(KPCA(60))
+    # expr.experiment(Fisherfaces(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # ensemble()

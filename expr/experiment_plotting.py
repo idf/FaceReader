@@ -113,7 +113,7 @@ class PlotterKernelPCA(Plotter):
         class KPCA_poly(KPCA):
             def short_name(self):
                 return "poly (degree: %d)" %self._degree
-            
+
         for degree in xrange(1, 6):
             models.append(KPCA_poly(50, "poly", degree))
         self._plot(models)
@@ -157,16 +157,29 @@ class PlotterKernelPCA(Plotter):
                 return "sigmoid (gamma: %.2f)"%self._gamma
         self._plot([KPCA_sigmoid(kernel = "sigmoid", gamma = i) for i in r])
 
+
 class PlotterEnsemble(Plotter):
     def plot_fisher(self):
         expr = FeaturesEnsembleExperiment()
         plt.axis([0, 0.5, 0.9, 1.001])
 
-        features = [LbpFisher(ExtendedLBP(i)) for i in (3, 6, 10, 11, 14, 15, 19)]   # (3, 6, 10, 11, 14, 15, 19)
+        class LbpFisherSub(LbpFisher):
+            def short_name(self):
+                return "EnsembleLbpFisher"
+
+        features = [LbpFisherSub(ExtendedLBP(i)) for i in (3, 6, 10, 11, 14, 15, 19)]   # (3, 6, 10, 11, 14, 15, 19)
         cv = expr.experiment(features, threshold_up=1, debug=False)
         expr.plot_roc(cv)
 
-        features = [Fisherfaces(14)]
+        features = [LbpFisher(ExtendedLBP(6))]
+        cv = expr.experiment(features, threshold_up=1, debug=False)
+        expr.plot_roc(cv)
+
+        class FisherfacesSub(Fisherfaces):
+            def short_name(self):
+                return "Fisher"
+
+        features = [FisherfacesSub(14)]
         cv = expr.experiment(features, threshold_up=1, debug=False)
         expr.plot_roc(cv)
 
@@ -175,9 +188,9 @@ class PlotterEnsemble(Plotter):
 
 if __name__=="__main__":
     # PlotterPCA().plot_energy()
-    PlotterKernelPCA().plot_rbf()
+    # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()
     # PlotterFisher().plot_components()
     # PlotterKnn().plot_kNN()
     # PlotterLgbphs().plot_orientations()
-    # PlotterEnsemble().plot_fisher()
+    PlotterEnsemble().plot_fisher()

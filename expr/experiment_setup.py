@@ -27,7 +27,8 @@ class Drawer(object):
         plt.xlabel('FPR')
         plt.ylabel('TPR')
         # colors: http://stackoverflow.com/questions/22408237/named-colors-in-matplotlib
-        plt.rc('axes', color_cycle=['r', 'g', 'b', 'c', 'm', 'y', 'k', 'darkgreen', 'chocolate', 'darksalmon', 'darkseagreen', 'yellowgreen'])
+        plt.rc('axes', color_cycle=['r', 'g', 'b', 'c', 'm', 'y', 'k',
+                                    'darkgreen', 'chocolate', 'darksalmon', 'darkseagreen', 'yellowgreen'])
         self.is_smooth = smooth
         self._rocs = []
 
@@ -93,16 +94,37 @@ class Experiment(object):
         y = np.asarray(y)
         return X, y
 
-    def plot_fisher(self, X, model):
+    def plot_fisher_original(self, X, model):
         E = []
         for i in xrange(min(model.feature.eigenvectors.shape[1], 16)):
             e = model.feature.eigenvectors[:, i].reshape(X[0].shape)
             E.append(minmax_normalize(e, 0, 255, dtype=np.uint8))
-        # Plot them and store the plot to "python_fisherfaces_fisherfaces.pdf"
+        # Plot them and store the plot to "python_fisherfaces_fisherfaces.png"
         subplot(title="Fisherfaces", images=E, rows=4, cols=4, sptitle="Fisherface", colormap=cm.jet,
                 filename="fisherfaces.png")
         # Close current figure
         plt.close()
+
+    def plot_fisher(self, X, model, r=3, c=5):
+        """
+        draw fisher face components
+        color map: http://matplotlib.org/examples/color/colormaps_reference.html
+        :param X: images
+        :param model: fisher face model
+        :param r: number of rows
+        :param c: number of cols
+        :return:
+        """
+        E = []
+        for i in xrange(min(model.feature.eigenvectors.shape[1], r*c)):
+            e = model.feature.eigenvectors[:, i].reshape(X[0].shape)
+            E.append(minmax_normalize(e, 0, 255, dtype=np.uint8))
+
+        # Plot them and store the plot to "python_fisherfaces_fisherfaces.png"
+        subplot(title="Fisherface Components", images=E, rows=r, cols=c, sptitle="fisherface", colormap=cm.rainbow,
+                filename="fisherfaces.png")
+        plt.close()
+
 
     def experiment(self, feature=Fisherfaces(), plot=None, dist_metric=EuclideanDistance(), threshold_up=0, kNN_k=1, number_folds=None, debug=True):
         """
@@ -198,7 +220,7 @@ if __name__ == "__main__":
     # expr.experiment(SpatialHistogram())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(KPCA(60))
-    # expr.experiment(Fisherfaces(15), debug=False)
+    # expr.experiment(Fisherfaces(15), plot=expr.plot_fisher, debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # ensemble_lbp_fisher()

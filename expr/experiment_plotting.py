@@ -9,17 +9,17 @@ class Plotter(object):
     def __init__(self):
         pass
 
-    def _plot(self, models):
+    def _plot(self, models, dist_metric=EuclideanDistance()):
         expr = Experiment(froze_shuffle=True)
         for model in models:
-            cv = expr.experiment(model, threshold_up=1, debug=False)
+            cv = expr.experiment(model, threshold_up=1, debug=False, dist_metric=dist_metric)
             expr.plot_roc(cv)
         expr.show_plot()
 
-    def _simple_run(self, models):
+    def _simple_run(self, models, dist_metric=EuclideanDistance()):
         expr = Experiment(froze_shuffle=True)
         for model in models:
-            expr.experiment(model, threshold_up=0, debug=False)
+            expr.experiment(model, threshold_up=0, debug=False, dist_metric=dist_metric)
 
 
 class PlotterPCA(Plotter):
@@ -75,6 +75,9 @@ class PlotterKnn(object):
 
 
 class PlotterLgbphs(Plotter):
+    def _plot(self, models):
+        super(PlotterLgbphs, self)._plot(models, HistogramIntersection())
+
     @print_func_name
     def plot_lbp_algorihtms(self):
         class LgbphsSub(LGBPHS2):

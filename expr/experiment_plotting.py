@@ -221,6 +221,7 @@ class PlotterEnsemble(Plotter):
 
 
 if __name__=="__main__":
+    print sys.argv[0]
     # PlotterPCA().plot_energy()
     # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()
@@ -230,6 +231,6 @@ if __name__=="__main__":
     # PlotterLgbphs().get_precision_scales()
     # PlotterLgbphs().plot_orientations()
     # PlotterLgbphs().get_precisions_orientations()
-    PlotterLgbphs().plot_gabor()
+    # PlotterLgbphs().plot_gabor()
     # PlotterLgbphs().plot_lbp_algorihtms()
     # PlotterEnsemble().plot_fisher()

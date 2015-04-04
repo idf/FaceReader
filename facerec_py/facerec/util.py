@@ -1,3 +1,5 @@
+import os
+from PIL import Image
 import numpy as np
 import random
 from scipy import ndimage
@@ -92,7 +94,6 @@ def shuffle_array(X, y):
     idx = np.argsort([random.random() for i in xrange(len(y))])
     X = [X[i] for i in idx]
     y = [y[i] for i in idx]
-    return (X, y)
-    
+    return X, y
 
 

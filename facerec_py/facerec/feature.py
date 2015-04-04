@@ -26,13 +26,14 @@ class Identity(AbstractFeature):
     Simplest AbstractFeature you could imagine. It only forwards the data and does not operate on it, 
     probably useful for learning a Support Vector Machine on raw data for example!
     """
+
     def __init__(self):
         AbstractFeature.__init__(self)
 
-    def compute(self,X,y):
+    def compute(self, X, y):
         return X
 
-    def extract(self,X):
+    def extract(self, X):
         return X
 
     def __repr__(self):
@@ -48,8 +49,11 @@ class PCA(AbstractFeature):
         AbstractFeature.__init__(self)
         self._num_components = num_components
         self._total_energy = 0
+        self._mean = None
+        self._eigenvectors = None
+        self._eigenvalues = None
 
-    def compute(self,X,y):
+    def compute(self, X, y):
         """
         PCA over the entire images set
         dimension reduction for entire images set
@@ -71,24 +75,24 @@ class PCA(AbstractFeature):
         y = np.asarray(y)
 
         # set a valid number of components
-        if self._num_components <= 0 or (self._num_components > XC.shape[1]-1):
-            self._num_components = XC.shape[1]-1  # one less dimension
+        if self._num_components <= 0 or (self._num_components > XC.shape[1] - 1):
+            self._num_components = XC.shape[1] - 1  # one less dimension
 
         # center dataset
-        self._mean = XC.mean(axis=1).reshape(-1,1)
+        self._mean = XC.mean(axis=1).reshape(-1, 1)
         XC = XC - self._mean
 
         # perform an economy size decomposition (may still allocate too much memory for computation)
         self._eigenvectors, self._eigenvalues, variances = np.linalg.svd(XC, full_matrices=False)
 
         # turn singular values into eigenvalues
-        self._eigenvalues = np.power(self._eigenvalues,2) / XC.shape[1]
+        self._eigenvalues = np.power(self._eigenvalues, 2) / XC.shape[1]
 
         # sort eigenvectors by eigenvalues in descending order
         self._total_energy = np.sum(self._eigenvalues)
 
         idx = np.argsort(-self._eigenvalues)
-        self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:,idx]
+        self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:, idx]
 
         # use only num_components
         self._eigenvectors = self._eigenvectors[:, :self._num_components].copy()
@@ -97,12 +101,12 @@ class PCA(AbstractFeature):
         # get the features from the given data
         features = []
         for x in X:
-            xp = self.project(x.reshape(-1,1))
+            xp = self.project(x.reshape(-1, 1))
             features.append(xp)
         return features
 
-    def extract(self,X):
-        X = np.asarray(X).reshape(-1,1)
+    def extract(self, X):
+        X = np.asarray(X).reshape(-1, 1)
         return self.project(X)
 
     def project(self, X):
@@ -131,19 +135,21 @@ class PCA(AbstractFeature):
 
     @property
     def energy_percentage(self):
-        return np.sum(self._eigenvalues)/self._total_energy
+        return np.sum(self._eigenvalues) / self._total_energy
 
     def __repr__(self):
-        return "PCA (num_components=%d)"%self._num_components
+        return "PCA (num_components=%d)" % self._num_components
 
     def short_name(self):
-        return "PCA: %d"%self._num_components
+        return "PCA: %d" % self._num_components
 
 
 class LDA(AbstractFeature):
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
         self._num_components = num_components
+        self._eigenvalues = None
+        self._eigenvectors = None
 
     def compute(self, X, y):
         # build the column matrix
@@ -154,31 +160,36 @@ class LDA(AbstractFeature):
         c = len(np.unique(y))
         # set a valid number of components
         if self._num_components <= 0:
-            self._num_components = c-1
-        elif self._num_components > (c-1):
-            self._num_components = c-1
+            self._num_components = c - 1
+        elif self._num_components > (c - 1):
+            self._num_components = c - 1
+
         # calculate total mean
-        meanTotal = XC.mean(axis=1).reshape(-1,1)
+        mean_total = XC.mean(axis=1).reshape(-1, 1)  # for between class scatter matrices
+
         # calculate the within and between scatter matrices
         Sw = np.zeros((d, d), dtype=np.float32)
         Sb = np.zeros((d, d), dtype=np.float32)
-        for i in range(0,c):
-            Xi = XC[:,np.where(y==i)[0]]
-            meanClass = np.mean(Xi, axis = 1).reshape(-1,1)
-            Sw = Sw + np.dot((Xi-meanClass), (Xi-meanClass).T)
-            Sb = Sb + Xi.shape[1] * np.dot((meanClass - meanTotal), (meanClass - meanTotal).T)
+        for i in range(0, c):
+            Xi = XC[:, np.where(y==i)[0]]
+            mean_class = np.mean(Xi, axis=1).reshape(-1, 1)
+            Sw += np.dot((Xi - mean_class), (Xi - mean_class).T)
+            Sb += Xi.shape[1] * np.dot((mean_class - mean_total), (mean_class - mean_total).T)
+
         # solve eigenvalue problem for a general matrix
-        self._eigenvalues, self._eigenvectors = np.linalg.eig(np.linalg.inv(Sw)*Sb)
+        self._eigenvalues, self._eigenvectors = np.linalg.eig(np.linalg.inv(Sw) * Sb)
+
         # sort eigenvectors by their eigenvalue in descending order
         idx = np.argsort(-self._eigenvalues.real)
-        self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:,idx]
+        self._eigenvalues, self._eigenvectors = self._eigenvalues[idx], self._eigenvectors[:, idx]
         # only store (c-1) non-zero eigenvalues
         self._eigenvalues = np.array(self._eigenvalues[0:self._num_components].real, dtype=np.float32, copy=True)
-        self._eigenvectors = np.matrix(self._eigenvectors[0:,0:self._num_components].real, dtype=np.float32, copy=True)
+        self._eigenvectors = np.matrix(self._eigenvectors[0:, 0:self._num_components].real, dtype=np.float32, copy=True)
+
         # get the features from the given data
         features = []
         for x in X:
-            xp = self.project(x.reshape(-1,1))
+            xp = self.project(x.reshape(-1, 1))
             features.append(xp)
         return features
 
@@ -201,13 +212,15 @@ class LDA(AbstractFeature):
         return self._eigenvalues
 
     def __repr__(self):
-        return "LDA (num_components=%d)"%self._num_components
+        return "LDA (num_components=%d)" % self._num_components
 
 
 class Fisherfaces(AbstractFeature):
     def __init__(self, num_components=0):
         AbstractFeature.__init__(self)
         self._num_components = num_components
+        self._eigenvectors = None
+        self._eigenvalues = None
 
     def compute(self, X, y):
         # turn into numpy representation
@@ -216,27 +229,30 @@ class Fisherfaces(AbstractFeature):
         # gather some statistics about the dataset
         n = len(y)
         c = len(np.unique(y))
+
         # define features to be extracted
         pca = PCA(num_components=(n-c))
         lda = LDA(num_components=self._num_components)
         # fisherfaces are a chained feature of PCA followed by LDA
-        model = ChainOperator(pca,lda)
+        model = ChainOperator(pca, lda)
         # computing the chained model then calculates both decompositions
-        model.compute(X,y)
+        model.compute(X, y)
+
         # store eigenvalues and number of components used
         self._eigenvalues = lda.eigenvalues
         self._num_components = lda.num_components
         # compute the new eigenspace as pca.eigenvectors*lda.eigenvectors
-        self._eigenvectors = np.dot(pca.eigenvectors,lda.eigenvectors)
+        self._eigenvectors = np.dot(pca.eigenvectors, lda.eigenvectors)
+
         # finally compute the features (these are the Fisherfaces)
         features = []
         for x in X:
-            xp = self.project(x.reshape(-1,1))
+            xp = self.project(x.reshape(-1, 1))
             features.append(xp)
         return features
 
-    def extract(self,X):
-        X = np.asarray(X).reshape(-1,1)
+    def extract(self, X):
+        X = np.asarray(X).reshape(-1, 1)
         return self.project(X)
 
     def project(self, X):
@@ -261,7 +277,8 @@ class Fisherfaces(AbstractFeature):
         return "Fisherfaces (num_components=%s)" % self._num_components
 
     def short_name(self):
-        return "Fisher: %d"%self._num_components
+        return "Fisher: %d" % self._num_components
+
 
 from facerec_py.facerec.lbp import *
 
@@ -282,7 +299,7 @@ class SpatialHistogram(AbstractFeature):
         self.lbp_operator = lbp_operator
         self.sz = sz
 
-    def compute(self,X,y):
+    def compute(self, X, y):
         features = []
         for x in X:
             x = np.asarray(x)  # x is the image, height * width
@@ -290,29 +307,43 @@ class SpatialHistogram(AbstractFeature):
             features.append(h)
         return features
 
-    def extract(self,X):
+    def extract(self, X):
         X = np.asarray(X)
         return self.spatially_enhanced_histogram(X)
 
     def spatially_enhanced_histogram(self, X):
+        """
+        Spatial Histogram with LBP processed files
+        :param X: the image
+        :return:
+        """
         # calculate the LBP image
-        L = self.lbp_operator(X)  # height * width
+        L = self.lbp_operator(X)  # shape: height * width, L
+
         # calculate the grid geometry
         lbp_height, lbp_width = L.shape
         grid_rows, grid_cols = self.sz
+        # grid size
         py = int(np.floor(lbp_height/grid_rows))
         px = int(np.floor(lbp_width/grid_cols))
+
         E = []
-        for row in range(0,grid_rows):
-            for col in range(0,grid_cols):
-                C = L[row*py:(row+1)*py,col*px:(col+1)*px]
-                H = np.histogram(C,
-                                 bins=2**self.lbp_operator.neighbors,
-                                 range=(0, 2**self.lbp_operator.neighbors),
-                                 normed=True)[0]  # normalized
+        for row in range(0, grid_rows):
+            for col in range(0, grid_cols):
+                C = L[row*py:(row+1)*py, col*px:(col+1)*px]  # sub-regions
+                H = self._get_histogram(C)
                 # probably useful to apply a mapping?
                 E.extend(H)
         return np.asarray(E)
+
+    def _get_histogram(self, C):
+        H = np.histogram(C,
+                         bins=2 ** self.lbp_operator.neighbors,  # the lbp scales
+                         range=(0, 2 ** self.lbp_operator.neighbors),
+                         weights=None,
+                         normed=True
+        )[0]  # normalized
+        return H
 
     def __repr__(self):
         return "SpatialHistogram LBP (operator=%s, grid=%s)" % (repr(self.lbp_operator), str(self.sz))

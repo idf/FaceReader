@@ -1,5 +1,4 @@
 import sys
-from expr.kernelpca_ski import KPCA
 
 from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
@@ -217,10 +216,11 @@ def ensemble_lbp_fisher():
 if __name__ == "__main__":
     expr = Experiment(froze_shuffle=True)
     # draw_roc(expr)
-    # expr.experiment(SpatialHistogram())
+    # expr.experiment(SpatialHistogram(), dist_metric=HistogramIntersection())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
-    # expr.experiment(KPCA(60))
+    # expr.experiment(PCA(50), plot=expr.plot_fisher, debug=False)
     # expr.experiment(Fisherfaces(15), plot=expr.plot_fisher, debug=False)
+    # expr.experiment(Identity(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # ensemble_lbp_fisher()

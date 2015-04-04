@@ -173,8 +173,8 @@ class LDA(AbstractFeature):
         for i in range(0, c):
             Xi = XC[:, np.where(y==i)[0]]
             mean_class = np.mean(Xi, axis=1).reshape(-1, 1)
-            Sw += np.dot((Xi - mean_class), (Xi - mean_class).T)
-            Sb += Xi.shape[1] * np.dot((mean_class - mean_total), (mean_class - mean_total).T)
+            Sw = Sw + np.dot((Xi - mean_class), (Xi - mean_class).T)
+            Sb = Sb + Xi.shape[1] * np.dot((mean_class - mean_total), (mean_class - mean_total).T)
 
         # solve eigenvalue problem for a general matrix
         self._eigenvalues, self._eigenvectors = np.linalg.eig(np.linalg.inv(Sw) * Sb)

@@ -220,21 +220,94 @@ class PlotterEnsemble(Plotter):
 
         expr.show_plot()
 
+
+class IdentityFold(Identity):
+    def __init__(self, k):
+        self.k = k
+        super(IdentityFold, self).__init__()
+
+    def short_name(self):
+        return "folds - %d" % self.k
+
+
+class PCAFold(PCA):
+    def __init__(self, k, num_components):
+        self.k = k
+        super(PCAFold, self).__init__(num_components)
+
+    def short_name(self):
+        return "folds - %d" % self.k
+
+
 class Plotter1NN(Plotter):
     def plot_1NN(self):
-        #pca = PCA(50)
-        #identity = Identity()
         expr = Experiment()
-        # models = []
-        for number_folds in xrange(2, 12, 2):  # TODO
-            cv = expr.experiment(feature=Identity(), threshold_up = 1, number_folds = number_folds, debug=False)
-            expr.plot_roc(cv, number_folds, folds = True)
+
+        for number_folds in xrange(2, 12, 1):  # TODO
+            cv = expr.experiment(IdentityFold(number_folds), threshold_up=1, number_folds=number_folds, debug=False)
+            expr.plot_roc(cv)
+
         expr.show_plot()
+
+    def plot_1NN_PCA(self):
+        expr = Experiment()
+
+        class PCASub(PCA):
+            def __init__(self, k, num_components):
+                self.k = k
+                super(PCASub, self).__init__(num_components)
+
+            def short_name(self):
+                return "folds - %d" % self.k
+
+        for number_folds in xrange(2, 12, 1):
+            cv = expr.experiment(PCASub(number_folds, 50), threshold_up=1, number_folds=number_folds, debug=False)
+            expr.plot_roc(cv)
+
+        expr.show_plot()
+
+    def plot_1NN_Identity_Precisions(self):
+        """
+        _plot the graph of varying k of kNN
+        :return:
+        """
+        expr = Experiment(froze_shuffle=True)
+
+        plt.figure("No reduction, precision for different number of folds")
+        plt.xlabel("number of folds")
+        plt.ylabel("precision")
+
+        xys = []
+        for number_folds in xrange(2, 12, 1):
+            cv = expr.experiment(IdentityFold(number_folds), threshold_up=0, number_folds=number_folds, debug=False)
+            xys.append((number_folds, cv.validation_results[0].precision))
+
+        plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
+        plt.show()
+
+    def plot_1NN_PCA_Precisions(self):
+        """
+        _plot the graph of varying k of kNN
+        :return:
+        """
+        expr = Experiment(froze_shuffle=True)
+
+        plt.figure("PCA precision for different number of folds")
+        plt.xlabel("number of folds")
+        plt.ylabel("precision")
+
+        xys = []
+        for number_folds in xrange(2, 12, 1):
+            cv = expr.experiment(PCAFold(number_folds, 50), threshold_up=0, number_folds=number_folds, debug=False)
+            xys.append((number_folds, cv.validation_results[0].precision))
+
+        plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
+        plt.show()
 
 
 if __name__=="__main__":
     # print __file__
-    Plotter1NN().plot_1NN()
+    Plotter1NN().plot_1NN_PCA_Precisions()
     # PlotterPCA().plot_energy()
     # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()

@@ -36,7 +36,7 @@ class Drawer(object):
         plt.legend(handles=self._rocs)
         plt.show()
 
-    def plot_roc(self, cv, number_folds = 2, folds = False):
+    def plot_roc(self, cv):
         """
         :type cv: KFoldCrossValidation
         :param cv:
@@ -51,15 +51,12 @@ class Drawer(object):
         TPRs.append(0.0)
         FPRs.append(1.0)
         TPRs.append(1.0)
-        label = "%d folds" % number_folds
+
         if self.is_smooth:
             FPRs, TPRs = self.smooth(FPRs, TPRs)
 
         # Plot ROC
-        if folds:
-            roc, = plt.plot(FPRs, TPRs, label=label)
-        else:
-            roc, = plt.plot(FPRs, TPRs, label=cv.model.feature.short_name())
+        roc, = plt.plot(FPRs, TPRs, label=cv.model.feature.short_name())
         self._rocs.append(roc)
 
     def smooth(self, x, y):
@@ -75,6 +72,11 @@ class Drawer(object):
 
 class Experiment(object):
     def __init__(self, smooth=False, froze_shuffle=False):
+        """
+
+        :param smooth: smooth the ROC curves
+        :param froze_shuffle: if set True, the data only shuffle once, and subsequently no shuffling.
+        """
         self.logger = LoggerFactory().getConsoleLogger("facerec")
         self._drawer = Drawer(smooth)
         self.X, self.y = shuffle(*self.read())  # shuffle once

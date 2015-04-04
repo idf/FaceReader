@@ -36,7 +36,7 @@ class Drawer(object):
         plt.legend(handles=self._rocs)
         plt.show()
 
-    def plot_roc(self, cv):
+    def plot_roc(self, cv, number_folds = 2, folds = False):
         """
         :type cv: KFoldCrossValidation
         :param cv:
@@ -51,12 +51,15 @@ class Drawer(object):
         TPRs.append(0.0)
         FPRs.append(1.0)
         TPRs.append(1.0)
-
+        label = "%d folds" % number_folds
         if self.is_smooth:
             FPRs, TPRs = self.smooth(FPRs, TPRs)
 
         # Plot ROC
-        roc, = plt.plot(FPRs, TPRs, label=cv.model.feature.short_name())
+        if folds:
+            roc, = plt.plot(FPRs, TPRs, label=label)
+        else:
+            roc, = plt.plot(FPRs, TPRs, label=cv.model.feature.short_name())
         self._rocs.append(roc)
 
     def smooth(self, x, y):

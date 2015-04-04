@@ -1,5 +1,6 @@
 from experiment_setup import *
 import numpy as np
+from expr.kernelpca_ski import KPCA
 from util.commons_util.decorators.general import print_func_name
 
 __author__ = 'Danyang'

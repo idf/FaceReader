@@ -87,9 +87,9 @@ class GaborLbpIntermidiate(LbpIntermidiate):
 
     def run(self):
         self.draw("Original")
-        self.draw("Lbp", lbp_filter=self.lbp_filter)
-        self.draw("Gabor", gabor_filter=lambda x: self.gabor_filter(x, 5))
-        self.draw("LGBPHS", lbp_filter=self.lbp_filter, gabor_filter=self.gabor_filter)
+        self.draw("LBP", lbp_filter=self.lbp_filter)
+        self.draw("Gabor Magnitude", gabor_filter=lambda x: self.gabor_filter(x, 12))
+        self.draw("LGBP", lbp_filter=self.lbp_filter, gabor_filter=self.gabor_filter)
 
     def histogram(self, L, row, col):
         # calculate the grid geometry

@@ -221,7 +221,7 @@ class PlotterEnsemble(Plotter):
 
 
 if __name__=="__main__":
-    print sys.argv[0]
+    print __file__
     # PlotterPCA().plot_energy()
     # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()

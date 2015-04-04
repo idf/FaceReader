@@ -225,7 +225,7 @@ if __name__ == "__main__":
     # expr.experiment(SpatialHistogram(), dist_metric=HistogramIntersection())
     # expr.experiment(LGBPHS2(), dist_metric=HistogramIntersection())
     # expr.experiment(PCA(50), plot=expr.plot_fisher, debug=False)
-    # expr.experiment(Fisherfaces(15), plot=expr.plot_fisher, debug=False)
+    # expr.experiment(Fisherfaces(14), plot=expr.plot_fisher, debug=False)
     # expr.experiment(Identity(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)

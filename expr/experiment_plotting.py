@@ -239,6 +239,15 @@ class PCAFold(PCA):
         return "folds - %d" % self.k
 
 
+class FisherFold(Fisherfaces):
+    def __init__(self, k, num_components):
+        self.k = k
+        super(FisherFold, self).__init__(num_components)
+
+    def short_name(self):
+        return "folds - %d" % self.k
+
+
 class Plotter1NN(Plotter):
     def plot_1NN(self):
         expr = Experiment()
@@ -298,7 +307,26 @@ class Plotter1NN(Plotter):
 
         xys = []
         for number_folds in xrange(2, 12, 1):
-            cv = expr.experiment(PCAFold(number_folds, 50), threshold_up=0, number_folds=number_folds, debug=False)
+            cv = expr.experiment(PCAFold(number_folds, 40), threshold_up=0, number_folds=number_folds, debug=False)
+            xys.append((number_folds, cv.validation_results[0].precision))
+
+        plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
+        plt.show()
+
+    def plot_1NN_fisher_precisions(self):
+        """
+        _plot the graph of varying k of kNN
+        :return:
+        """
+        expr = Experiment(froze_shuffle=True)
+
+        plt.figure("Fisher precision for different number of folds")
+        plt.xlabel("number of folds")
+        plt.ylabel("precision")
+
+        xys = []
+        for number_folds in xrange(2, 12, 1):
+            cv = expr.experiment(FisherFold(number_folds, 14), threshold_up=0, number_folds=number_folds, debug=False)
             xys.append((number_folds, cv.validation_results[0].precision))
 
         plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
@@ -306,8 +334,8 @@ class Plotter1NN(Plotter):
 
 
 if __name__=="__main__":
-    # print __file__
-    Plotter1NN().plot_1NN_PCA_Precisions()
+    print __file__
+    Plotter1NN().plot_1NN_fisher_precisions()
     # PlotterPCA().plot_energy()
     # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()

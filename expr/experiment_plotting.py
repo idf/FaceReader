@@ -220,9 +220,21 @@ class PlotterEnsemble(Plotter):
 
         expr.show_plot()
 
+class Plotter1NN(Plotter):
+    def plot_1NN(self):
+        #pca = PCA(50)
+        #identity = Identity()
+        expr = Experiment()
+        # models = []
+        for number_folds in xrange(2, 12, 2):  # TODO
+            cv = expr.experiment(feature=Identity(), threshold_up = 1, number_folds = number_folds, debug=False)
+            expr.plot_roc(cv, number_folds, folds = True)
+        expr.show_plot()
+
 
 if __name__=="__main__":
-    print __file__
+    # print __file__
+    Plotter1NN().plot_1NN()
     # PlotterPCA().plot_energy()
     # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()

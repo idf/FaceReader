@@ -7,7 +7,6 @@ from facerec_py.facerec.feature import *
 import cv2
 from facerec_py.facerec.lbp import *
 from facerec_py.facerec.preprocessing import LBPPreprocessing
-from util.commons_util.decorators.algorithms import memoize, memoize_force
 
 __author__ = 'Danyang'
 
@@ -204,7 +203,7 @@ class ConcatenatedSpatialHistogram(SpatialHistogram):
 
     def spatially_enhanced_histogram(self, X):
         hists = []
-        for x in X:
+        for x in X:  # reduce 1 dimension
             hist = super(ConcatenatedSpatialHistogram, self).spatially_enhanced_histogram(x)
             hists.extend(hist)
         return np.asarray(hists)

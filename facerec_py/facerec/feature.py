@@ -298,8 +298,13 @@ class SpatialHistogram(AbstractFeature):
             raise TypeError("Only an operator of type facerec.lbp.LocalDescriptor is a valid lbp_operator.")
         self.lbp_operator = lbp_operator
         self.sz = sz
+        self.X = None
+        self.y = None
 
     def compute(self, X, y):
+        self.X = X
+        self.y = y
+
         features = []
         for x in X:
             x = np.asarray(x)  # x is the image, height * width
@@ -331,17 +336,17 @@ class SpatialHistogram(AbstractFeature):
         for row in range(0, grid_rows):
             for col in range(0, grid_cols):
                 C = L[row*py:(row+1)*py, col*px:(col+1)*px]  # sub-regions
-                H = self._get_histogram(C)
+                H = self._get_histogram(C, row, col)
                 # probably useful to apply a mapping?
                 E.extend(H)
         return np.asarray(E)
 
-    def _get_histogram(self, C):
+    def _get_histogram(self, C, row, col, normed=True):
         H = np.histogram(C,
                          bins=2 ** self.lbp_operator.neighbors,  # the lbp scales
                          range=(0, 2 ** self.lbp_operator.neighbors),
                          weights=None,
-                         normed=True
+                         normed=normed
         )[0]  # normalized
         return H
 

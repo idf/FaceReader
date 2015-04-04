@@ -1,4 +1,5 @@
 import sys
+from expr.weighted_hs import WeightedLGBPHS
 
 from facerec_py.facerec.distance import *
 from facerec_py.facerec.classifier import NearestNeighbor
@@ -224,3 +225,4 @@ if __name__ == "__main__":
     # expr.experiment(LbpFisher(), debug=False)
     # expr.experiment(LbpFisher(), debug=False)
     # ensemble_lbp_fisher()
+    # expr.experiment(WeightedLGBPHS(), debug=False)

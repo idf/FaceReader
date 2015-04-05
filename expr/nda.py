@@ -15,16 +15,17 @@ class train():
         self.totalClass = 0
 
 class NDAFisher(AbstractFeature):
-    def __init__(self, num_components=100):
+    def __init__(self, num_components=100, K=1):
         AbstractFeature.__init__(self)
         self._num_components = num_components
+        self.K = K
 
     def compute(self, X, y):
-        nda = NDA()
+        nda = NDA(self.K)
         pca = PCA(self._num_components)
         model = ChainOperator(pca, nda)
         model.compute(X, y)
-        self._eigenvectors = np.dot(pca.eigenvectors, nda.W.T)
+        self.eigenvectors = np.dot(pca.eigenvectors, nda.W.T)
         features = []
         for x in X:
             xp = self.project(x.reshape(-1, 1))
@@ -36,15 +37,19 @@ class NDAFisher(AbstractFeature):
         return self.project(X)
 
     def project(self, X):
-        return np.dot(self._eigenvectors.T, X)
+        return np.dot(self.eigenvectors.T, X)
+
+    def short_name(self):
+        return "NDA: "+str(self._num_components)
 
 
 
 class NDA(AbstractFeature):
-    def __init__(self):
+    def __init__(self, K):
         AbstractFeature.__init__(self)
+        self.K = K
 
-    def compute(self, X, y, K=1, useweights=0):
+    def compute(self, X, y, useweights=0):
         """
         fit data into to get the NDA model
         :param X: The images, which is a Python list of numpy arrays.
@@ -58,8 +63,7 @@ class NDA(AbstractFeature):
         self.train.N = np.size(X, 0)  #total number of samples
         self.train.dim = np.size(X, 1) #number of dim per sample
         self.train.totalClass = len(np.unique(y)) #number of classes
-        self.K = K
-
+        K = self.K
         self.dim = np.size(X, 1)
         self.origdim = self.train.dim
         self.N = np.size(X, 0)
@@ -82,7 +86,8 @@ class NDA(AbstractFeature):
         self.eval = np.flipud(self.eval)
         self.ind = np.flipud(self.ind)
         self.evec = self.evec[:, self.ind]
-        self.wdim = np.max(np.nonzero(self.eval > math.pow(10, -8))).real
+        # self.wdim = np.max(np.nonzero(self.eval > math.pow(10, -8))).real
+        self.wdim = np.max(self.eval).real
         self.evec = self.evec[:, 0:self.wdim]
         self.whiteMat = np.dot(np.diag(1/np.sqrt(self.eval[0:self.wdim])), self.evec.transpose())
         self.Wtr = np.dot(self.whiteMat, self.train.mat)
@@ -126,12 +131,12 @@ class NDA(AbstractFeature):
             self.data_intra = self.Wtr[:, who_cl]
             self.data_extra = self.Wtr[:, who_notcl]
 
-            knn = nn().fit(self.data_extra.transpose())
+            knn = nn(n_neighbors=10).fit(self.data_extra.transpose())
             self.dextra, self.indextra = knn.kneighbors(self.data_intra.transpose())
             self.dextra = self.dextra.transpose()
             self.indextra = self.indextra.transpose()
-            self.indEx[:, who_cl] = who_notcl[self.indextra[1, :]]
-            self.valEx[:, who_cl] = self.dextra[1, :]
+            self.indEx[:, who_cl] = who_notcl[self.indextra[0, :]]
+            self.valEx[:, who_cl] = self.dextra[0, :]
 
     def compute_bet_class_cluster_matrix(self):
         if self.K == 1:
@@ -147,12 +152,12 @@ class NDA(AbstractFeature):
         for x in np.unique(self.train.labels):
             who_cl = np.where(self.train.labels == x)[0]
             self.data_intra = self.train.mat[:, who_cl]
-            knn = nn().fit(self.data_intra.transpose())
+            knn = nn(n_neighbors=10).fit(self.data_intra.transpose())
             self.dintra, self.indintra = knn.kneighbors(self.data_intra.transpose())
             self.dintra = self.dintra.transpose()
             self.indintra = self.indintra.transpose()
-            self.dintra[self.K, :] = []
-            self.indintra[self.K, :] = []
+            self.dintra[self.K-1, :] = []
+            self.indintra[self.K-1, :] = []
             self.valIn[:, who_cl] = self.dintra[1, :]
             self.indIn[:, who_cl] = who_cl[self.indintra[1, :]]
 

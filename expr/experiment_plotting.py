@@ -220,7 +220,29 @@ class PlotterEnsemble(Plotter):
         expr.show_plot()
 
 
+class PlotterNDA(Plotter):
+    def plot_pca_comp(self):
+    """
+    plot accumulated precision with pca_comp
+    _:return:
+    """
+    expr = Experiment()
+    plt.figure("Average precision for different number of components in NDA")
+    plt.xlabel("number of components in PCA")
+    plt.ylabel("precision")
+    xys = []
+    for num_components in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]:
+        print num_components
+        cv = expr.experiment(Fisherfaces(num_components=num_components))
+        xys.append((num_components, cv.validation_results[0].precision))
+
+    plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
+    plt.show()
+
+
+
 if __name__=="__main__":
+    PlotterNDA().plot_pca_energy()
     # PlotterPCA().plot_energy()
     # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()
@@ -230,6 +252,6 @@ if __name__=="__main__":
     # PlotterLgbphs().get_precision_scales()
     # PlotterLgbphs().plot_orientations()
     # PlotterLgbphs().get_precisions_orientations()
-    PlotterLgbphs().plot_gabor()
+    # PlotterLgbphs().plot_gabor()
     # PlotterLgbphs().plot_lbp_algorihtms()
     # PlotterEnsemble().plot_fisher()

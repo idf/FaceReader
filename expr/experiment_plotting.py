@@ -26,7 +26,7 @@ class Plotter(object):
 class PlotterPCA(Plotter):
     def plot_components(self):
         models = []
-        for num_component in xrange(10, 150, 30):  # TODO
+        for num_component in xrange(10, 150, 30):
             models.append(PCA(num_component))
 
         self._plot(models)
@@ -36,9 +36,9 @@ class PlotterPCA(Plotter):
 
         class PCA_energy(PCA):
             def short_name(self):
-                return "PCA: %.2f%%"%(self.energy_percentage*100)
+                return "PCA: %.2f%%" % (self.energy_percentage * 100)
 
-        for num_component in xrange(20, 110, 40):  # TODO
+        for num_component in xrange(20, 110, 40):
             models.append(PCA_energy(num_component))
 
         self._plot(models)
@@ -47,7 +47,7 @@ class PlotterPCA(Plotter):
 class PlotterFisher(Plotter):
     def plot_components(self):
         models = []
-        for num_components in xrange(1, 16, 3):  # TODO
+        for num_components in xrange(1, 16, 3):
             models.append(Fisherfaces(num_components))
 
         self._plot(models)
@@ -67,7 +67,7 @@ class PlotterKnn(object):
         plt.ylabel("precision")
 
         xys = []
-        for k in xrange(1, 41):  # TODO
+        for k in xrange(1, 41):
             cv = expr.experiment(pca, threshold_up=0, kNN_k=k, debug=False)
             xys.append((k, cv.validation_results[0].precision))
 
@@ -83,7 +83,7 @@ class PlotterLgbphs(Plotter):
     def plot_lbp_algorihtms(self):
         class LgbphsSub(LGBPHS2):
             def short_name(self):
-                return "%s"%self.feature.model2.lbp_operator.short_name()
+                return "%s" % self.feature.model2.lbp_operator.short_name()
 
         models = []
         for lbp in (OriginalLBP(), ExtendedLBP(radius=6)):  # LPQ(radius=4)
@@ -132,10 +132,10 @@ class PlotterLgbphs(Plotter):
 
 
 class PlotterKernelPCA(Plotter):
-    def plot_rbf(self, r=(10000.0/(200*200), 0.5, 0.75, 1.0)):  # TODO
+    def plot_rbf(self, r=(10000.0 / (200 * 200), 0.5, 0.75, 1.0)):
         class KPCASub(KPCA):
             def short_name(self):
-                return "%s, gamma=%.4f"%(self._kernel, self._gamma)
+                return "%s, gamma=%.4f" % (self._kernel, self._gamma)
 
         self._plot([KPCASub(kernel="rbf", gamma=i) for i in r])
 
@@ -147,7 +147,7 @@ class PlotterKernelPCA(Plotter):
 
         class KPCA_poly(KPCA):
             def short_name(self):
-                return "poly (degree: %d)" %self._degree
+                return "poly (degree: %d)" % self._degree
 
         for degree in xrange(1, 6):
             models.append(KPCA_poly(50, "poly", degree))
@@ -188,33 +188,38 @@ class PlotterKernelPCA(Plotter):
             models.append(KPCA(50, kernel))
         self._plot(models)
 
-    # others plotting TODO
-    def plot_poly_coef0(self, r = (0.0, 20.0, 40.0, 60.0, 80.0)):
+    def plot_poly_coef0(self, r=(0.0, 20.0, 40.0, 60.0, 80.0)):
         """
         varying coef0 values for poly
         """
+
         class KPCA_coef0(KPCA):
             def short_name(self):
-                return "poly (coef0: %.2f)" %self._coef0
-        self._plot([KPCA_coef0(kernel="poly", coef0 = i) for i in r])
+                return "poly (coef0: %.2f)" % self._coef0
 
-    def plot_poly_gamma(self, r = (10.0, 40.0, 70.0, 100.0, 130.0)):
+        self._plot([KPCA_coef0(kernel="poly", coef0=i) for i in r])
+
+    def plot_poly_gamma(self, r=(10.0, 40.0, 70.0, 100.0, 130.0)):
         """
         varying gamma values for poly
         """
+
         class KPCA_gamma(KPCA):
             def short_name(self):
-                return "poly (gamma: %.2f)" %self._gamma
-        self._plot([KPCA_gamma(kernel = "poly", gamma = i) for i in r])
+                return "poly (gamma: %.2f)" % self._gamma
 
-    def plot_sigmoid(self, r = (10.0, 20.0, 30.0, 40.0, 50.0)):
+        self._plot([KPCA_gamma(kernel="poly", gamma=i) for i in r])
+
+    def plot_sigmoid(self, r=(10.0, 20.0, 30.0, 40.0, 50.0)):
         """
         varying gamma values for sigmoid
         """
+
         class KPCA_sigmoid(KPCA):
             def short_name(self):
-                return "sigmoid (gamma: %.2f)"%self._gamma
-        self._plot([KPCA_sigmoid(kernel = "sigmoid", gamma = i) for i in r])
+                return "sigmoid (gamma: %.2f)" % self._gamma
+
+        self._plot([KPCA_sigmoid(kernel="sigmoid", gamma=i) for i in r])
 
 
 class PlotterEnsemble(Plotter):
@@ -226,7 +231,7 @@ class PlotterEnsemble(Plotter):
             def short_name(self):
                 return "EnsembleLbpFisher"
 
-        features = [LbpFisherSub(ExtendedLBP(i)) for i in (3, 6, 10, 11, 14, 15, 19)]   # (3, 6, 10, 11, 14, 15, 19)
+        features = [LbpFisherSub(ExtendedLBP(i)) for i in (3, 6, 10, 11, 14, 15, 19)]  # (3, 6, 10, 11, 14, 15, 19)
         cv = expr.experiment(features, threshold_up=1, debug=False)
         expr.plot_roc(cv)
 
@@ -276,7 +281,7 @@ class Plotter1NN(Plotter):
     def plot_1NN(self):
         expr = Experiment()
 
-        for number_folds in xrange(2, 12, 1):  # TODO
+        for number_folds in xrange(2, 12, 1):
             cv = expr.experiment(IdentityFold(number_folds), threshold_up=1, number_folds=number_folds, debug=False)
             expr.plot_roc(cv)
 
@@ -357,7 +362,7 @@ class Plotter1NN(Plotter):
         plt.show()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     print __file__
     # Plotter1NN().plot_1NN_fisher_precisions()
     # Plotter1NN().plot_1NN_PCA_Precisions()

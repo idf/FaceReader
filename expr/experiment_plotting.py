@@ -153,6 +153,30 @@ class PlotterKernelPCA(Plotter):
             models.append(KPCA_poly(50, "poly", degree))
         self._plot(models)
 
+    def plot_poly_degree_precisions(self):
+        """
+
+        :return:
+        """
+        expr = Experiment(froze_shuffle=True)
+
+        plt.figure("Kernel PCA precision for different number of degrees")
+        plt.xlabel("number of degrees")
+        plt.ylabel("precision")
+
+        class KPCA_poly(KPCA):
+            def short_name(self):
+                return "poly (degree: %d)" % self._degree
+
+        xys = []
+        for degree in (1, 4):
+            cv = expr.experiment(KPCA_poly(10, "poly", degree), threshold_up=0, debug=False)
+            xys.append((degree, cv.validation_results[0].precision))
+
+        plt.plot([elt[0] for elt in xys], [elt[1] for elt in xys])
+        plt.show()
+
+
     def plot_kernels(self):
         """
         varying kernels
@@ -335,7 +359,9 @@ class Plotter1NN(Plotter):
 
 if __name__=="__main__":
     print __file__
-    Plotter1NN().plot_1NN_fisher_precisions()
+    # Plotter1NN().plot_1NN_fisher_precisions()
+    # Plotter1NN().plot_1NN_PCA_Precisions()
+    # PlotterKernelPCA().plot_poly_degree_precisions()
     # PlotterPCA().plot_energy()
     # PlotterKernelPCA().plot_rbf()
     # PlotterPCA().plot_components()

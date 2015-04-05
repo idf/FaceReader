@@ -2,7 +2,7 @@ import sys
 from expr.weighted_hs import WeightedLGBPHS
 
 from facerec_py.facerec.distance import *
-from facerec_py.facerec.classifier import NearestNeighbor
+from facerec_py.facerec.classifier import NearestNeighbor, SVM
 from facerec_py.facerec.model import PredictableModel, FeaturesEnsemblePredictableModel
 from facerec_py.facerec.validation import KFoldCrossValidation, shuffle
 from facerec_py.facerec.visual import subplot
@@ -145,6 +145,7 @@ class Experiment(object):
         """
         # Define a 1-NN classifier with Euclidean Distance:
         classifier = NearestNeighbor(dist_metric=dist_metric, k=kNN_k)
+        # classifier = SVM()
         # Define the model as the combination
         model = self._get_model(feature, classifier)
         # Compute the Fisherfaces on the given data (in X) and labels (in y):

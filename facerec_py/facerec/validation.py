@@ -299,6 +299,7 @@ class KFoldCrossValidation(ValidationStrategy):
             l = int(i * foldSize)
             h = int((i + 1) * foldSize)
             # partition [0, l, h, n)
+            # leave fold size per person
             testIdx = slice_2d(foldIndices, rows=range(0, c), cols=range(l, h))
             trainIdx = slice_2d(foldIndices, rows=range(0, c), cols=range(0, l))
             trainIdx.extend(slice_2d(foldIndices, rows=range(0, c), cols=range(h, n)))

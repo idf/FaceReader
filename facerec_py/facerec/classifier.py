@@ -199,7 +199,7 @@ class SVM(AbstractClassifier):
 
     def __repr__(self):
         return "Support Vector Machine (kernel_type=%s, C=%.2f,gamma=%.2f,p=%.2f,nu=%.2f,coef=%.2f,degree=%.2f)" % (
-            KERNEL_TYPE[self.param.kernel_type], self.param.C, self.param.gamma, self.param.p, self.param.nu,
+            self.param.kernel_type, self.param.C, self.param.gamma, self.param.p, self.param.nu,
             self.param.coef0, self.param.degree)
 
 

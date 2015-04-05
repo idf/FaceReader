@@ -7,7 +7,7 @@ __author__ = 'Danyang'
 
 
 class KPCA(AbstractFeature):
-    def __init__(self, num_components=50, kernel="poly", degree=3, coef0=0.0, gamma=10):
+    def __init__(self, num_components=50, kernel="poly", degree=3, coef0=0.0, gamma=None):
         AbstractFeature.__init__(self)
         self._num_components = num_components
         self._kernel = kernel

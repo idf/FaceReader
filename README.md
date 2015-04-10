@@ -12,12 +12,13 @@ in expr/experiment_setup.py
 ## Databases
 ### Yale A 
 ![](/img/yale_a.png)  
-## Implementations 
+## Implementation results
+ROC curves:  
 ### Fisher Face  
 ![](/img/fisher.png)
 ### Non-parametric Discriminant Analysis (NDA) 
 ![](/img/nda.png)
-### Local Gabor Binary Histogram Sequence (LGBPHS)
+### Local Gabor Binary Pattern Histogram Sequence (LGBPHS)
 ![](/img/LGBPHS.png)
 ### Ensemble Local Binary Pattern Fisher 
 ![](/img/ensemble.png)  
